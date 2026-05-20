@@ -25,7 +25,7 @@
 | SLICE-04 — Assignments          | SLICE-01, SLICE-03                                         | built  |                |
 | SLICE-05 — Itinerary            | SLICE-01, SLICE-03, SLICE-04                               |        |                |
 | SLICE-07 — Costs & currency     | SLICE-01, SLICE-03, SLICE-04                               |        |                |
-| SLICE-09 — Risks                | SLICE-01, SLICE-06                                         |        |                |
+| SLICE-09 — Risks                | SLICE-01, SLICE-06                                         | built  |                |
 | SLICE-02 — Dashboard            | SLICE-01, SLICE-03, SLICE-04, SLICE-05, SLICE-06, SLICE-07 |        |                |
 | SLICE-10 — Master Plan          | SLICE-01, SLICE-03, SLICE-04, SLICE-05, SLICE-06, SLICE-07 |        |                |
 
@@ -65,7 +65,7 @@
 - tests: 30 passed (`contacts.integration`, `contact-schema`, `ContactsContent`, `use-contacts`, nav)
 - routes: `/contacts` (event-gated; `PagePermissionGuard` + shell `read:page.contacts`)
 - SLICE-09 contract: `tracContactsQueryKey`, `tracRisksQueryKey`, `invalidateContactsAndRiskPickers`
-- follow-up: optional live dev-db confirm before release; full `/risks` UI in SLICE-09 (picker contract shipped)
+- follow-up: SLICE-09 risks register shipped; picker contract consumed by `ResponsibleContactSelect`
 
 ### SLICE-08 — Journal
 
@@ -108,7 +108,17 @@
 ### SLICE-09 — Risks
 
 - authority: `docs/requirements/TR09-risks-requirements.md`
+- completion: `docs/delivery/TR09-slice-completion.md`
+- remediation: `docs/delivery/TR09-remediation-plan.md` (open until manual dev-db + print sign-off)
 - backend freeze: Frozen for this run — see `docs/delivery/trac-backend-ready-report.md` (PASS)
+- validate: PASS (6/6 checks)
+- tests: 11+ risks tests (`risks.integration`, `risk-schema`, `build-risk-payload`, `format-risk-impact`, `enums`; 101 total suite)
+- routes: `/risks` — risk register CRUD; `read:page.risks`; writes via `useResourcePermissions('risks')` + DataTable RBAC
+- acceptance criteria (TR09 §1–5): **implemented in code** — see completion record; **sign-off pending** manual dev-db + print (remediation P0)
+- testing (TR09 table): scenarios 1–3 + unit impact formatting **complete**
+- DEC-081: client omits `impact_before` / `impact_after` on write; display from generated columns only
+- SLICE-06: `responsible_contact_id` via `ResponsibleContactSelect` + shared query keys
+- follow-up: manual verification checklist (P0); print P3 polish + unit test done
 
 ### SLICE-02 — Dashboard
 

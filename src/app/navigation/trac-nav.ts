@@ -11,6 +11,7 @@ export const TRAC_REGISTERED_ROUTE_PATHS = new Set<string>([
   '/assignments',
   '/contacts',
   '/journal',
+  '/risks',
 ]);
 
 /** @deprecated Use {@link TRAC_REGISTERED_ROUTE_PATHS}. Kept for SLICE-01 test references. */
