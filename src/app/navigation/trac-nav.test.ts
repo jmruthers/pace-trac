@@ -27,12 +27,15 @@ describe('trac-nav', () => {
     expect(SLICE_01_REGISTERED_ROUTE_PATHS.has('/journal')).toBe(true);
     expect(SLICE_01_REGISTERED_ROUTE_PATHS.has('/itinerary')).toBe(true);
     expect(SLICE_01_REGISTERED_ROUTE_PATHS.has('/risks')).toBe(true);
+    expect(SLICE_01_REGISTERED_ROUTE_PATHS.has('/costs')).toBe(true);
+    expect(SLICE_01_REGISTERED_ROUTE_PATHS.has('/currency-rates')).toBe(false);
     const labels = getEnabledTracNavItems().map((item) => item.label);
     expect(labels).toEqual([
       'Planning',
       'Assignments',
       'Itinerary',
       'Contacts',
+      'Costs',
       'Journal',
       'Risks',
     ]);

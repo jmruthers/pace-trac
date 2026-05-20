@@ -18,8 +18,7 @@ export function RisksContent() {
   });
 
   const { can: canCreate } = usePageCan('risks', 'create');
-  const { risks, isLoading, error, refreshRisks, addRisk, updateRisk, deleteRisk, isSaving } =
-    useRisks();
+  const { risks, isLoading, error, addRisk, updateRisk, deleteRisk, isSaving } = useRisks();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
@@ -48,17 +47,15 @@ export function RisksContent() {
       } else if (selectedRisk != null) {
         await updateRisk(selectedRisk.id, formData);
       }
-      await refreshRisks();
     },
-    [addRisk, updateRisk, refreshRisks, dialogMode, selectedRisk]
+    [addRisk, updateRisk, dialogMode, selectedRisk]
   );
 
   const handleDeleteRow = useCallback(
     async (row: Risk) => {
       await deleteRisk(row.id);
-      await refreshRisks();
     },
-    [deleteRisk, refreshRisks]
+    [deleteRisk]
   );
 
   const columns: DataTableColumn<Risk>[] = useMemo(
@@ -176,14 +173,7 @@ export function RisksContent() {
         risk={selectedRisk}
         mode={dialogMode}
         onSave={handleSave}
-        onDelete={
-          dialogMode === 'edit'
-            ? async (id) => {
-                await deleteRisk(id);
-                await refreshRisks();
-              }
-            : undefined
-        }
+        onDelete={dialogMode === 'edit' ? deleteRisk : undefined}
         isSubmitting={isSaving}
       />
     </main>

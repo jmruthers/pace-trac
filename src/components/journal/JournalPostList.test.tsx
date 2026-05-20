@@ -30,6 +30,7 @@ describe('JournalPostList', () => {
         canUpdate={false}
         canDelete={false}
         onEdit={vi.fn()}
+        onDeletePost={vi.fn()}
         onDeleteImage={vi.fn()}
         isDeletingImage={false}
       />
@@ -44,6 +45,7 @@ describe('JournalPostList', () => {
         canUpdate
         canDelete
         onEdit={vi.fn()}
+        onDeletePost={vi.fn()}
         onDeleteImage={vi.fn()}
         isDeletingImage={false}
       />

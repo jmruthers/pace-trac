@@ -258,6 +258,11 @@ export function useJournalPosts() {
         throw new Error('Journal is not ready.');
       }
       const imageIds = (post.trac_journal_images ?? []).map((img) => img.id);
+      if (imageIds.length > 0 && storageClient == null) {
+        throw new JournalImageLifecycleError(
+          'Storage is not available. Try again after signing in.'
+        );
+      }
       const client = secureSupabase as {
         from: (table: string) => {
           delete: () => {
@@ -270,7 +275,7 @@ export function useJournalPosts() {
         throw new Error(error.message ?? 'Failed to delete journal post.');
       }
 
-      if (imageIds.length > 0 && storageClient != null) {
+      if (imageIds.length > 0) {
         const cleanup = await removeStorageObjectsForPost(
           storageClient as unknown as JournalStorageClient,
           imageIds

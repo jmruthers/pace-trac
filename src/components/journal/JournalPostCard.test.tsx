@@ -41,6 +41,7 @@ describe('JournalPostCard', () => {
         canUpdate
         canDelete
         onEdit={vi.fn()}
+        onDeletePost={vi.fn()}
         onDeleteImage={vi.fn()}
         isDeletingImage={false}
       />
@@ -49,5 +50,39 @@ describe('JournalPostCard', () => {
     expect(screen.getByText('Sunny')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /edit/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /remove image/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /delete entry/i })).not.toBeInTheDocument();
+  });
+
+  it('shows delete entry for delete-only users', () => {
+    render(
+      <JournalPostCard
+        post={post}
+        canUpdate={false}
+        canDelete
+        onEdit={vi.fn()}
+        onDeletePost={vi.fn()}
+        onDeleteImage={vi.fn()}
+        isDeletingImage={false}
+      />
+    );
+    expect(screen.getByRole('button', { name: /delete entry/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^edit$/i })).not.toBeInTheDocument();
+  });
+
+  it('shows edit only when user can update but not delete', () => {
+    render(
+      <JournalPostCard
+        post={{ ...post, trac_journal_images: [] }}
+        canUpdate
+        canDelete={false}
+        onEdit={vi.fn()}
+        onDeletePost={vi.fn()}
+        onDeleteImage={vi.fn()}
+        isDeletingImage={false}
+      />
+    );
+    expect(screen.getByRole('button', { name: /edit/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /delete entry/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /remove image/i })).not.toBeInTheDocument();
   });
 });

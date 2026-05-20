@@ -1,7 +1,8 @@
 import type { LogisticsResourceKind, LogisticsTableName } from '@/features/planning/types';
+import { TRAC_COSTS_QUERY_PREFIX } from '@/features/costs/cost-query-keys';
 
+export { TRAC_COSTS_QUERY_PREFIX };
 export const TRAC_ITINERARY_QUERY_PREFIX = ['trac-itinerary'] as const;
-export const TRAC_COSTS_QUERY_PREFIX = ['trac-costs'] as const;
 export const TRAC_DASHBOARD_QUERY_PREFIX = ['trac-dashboard'] as const;
 export const TRAC_MASTERPLAN_QUERY_PREFIX = ['trac-masterplan'] as const;
 

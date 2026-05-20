@@ -15,7 +15,9 @@ interface JournalPostCardProps {
   canUpdate: boolean;
   canDelete: boolean;
   onEdit: (post: JournalPost) => void;
+  onDeletePost: (post: JournalPost) => void;
   onDeleteImage: (imageId: string) => void;
+  isDeletingPost?: boolean;
   isDeletingImage: boolean;
 }
 
@@ -24,7 +26,9 @@ export function JournalPostCard({
   canUpdate,
   canDelete,
   onEdit,
+  onDeletePost,
   onDeleteImage,
+  isDeletingPost = false,
   isDeletingImage,
 }: JournalPostCardProps) {
   const paragraphs = formatJournalContentForDisplay(post.content);
@@ -40,6 +44,16 @@ export function JournalPostCard({
               {canUpdate && (
                 <Button type="button" variant="outline" onClick={() => onEdit(post)}>
                   Edit
+                </Button>
+              )}
+              {canDelete && !canUpdate && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  disabled={isDeletingPost}
+                  onClick={() => onDeletePost(post)}
+                >
+                  Delete entry
                 </Button>
               )}
             </fieldset>

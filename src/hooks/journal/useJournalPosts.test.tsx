@@ -33,6 +33,7 @@ function wrapper({ children }: { children: ReactNode }) {
 
 describe('useJournalPosts', () => {
   beforeEach(() => {
+    mockToast.mockClear();
     mockUseUnifiedAuthContext.mockReturnValue({ user: { id: 'user-1' } });
     mockUseEvents.mockReturnValue({
       selectedEvent: { id: 'ev-1', organisation_id: 'org-1' },
@@ -199,6 +200,72 @@ describe('useJournalPosts', () => {
       images: [file],
     });
     expect(upload).toHaveBeenCalled();
+  });
+
+  it('rejects post delete with images when storage client is unavailable', async () => {
+    const deleteEq = vi.fn().mockResolvedValue({ error: null });
+    mockUseStorageCapableClient.mockReturnValue(null);
+    mockUseSecureSupabase.mockReturnValue({
+      from: (table: string) => {
+        if (table === 'trac_journal_posts') {
+          return {
+            select: () => ({
+              eq: () => ({
+                order: async () => ({
+                  data: [
+                    {
+                      id: 'post-1',
+                      event_id: 'ev-1',
+                      organisation_id: 'org-1',
+                      title: 'With image',
+                      content: 'Body',
+                      status: 'published',
+                      created_at: '2026-01-01',
+                      updated_at: '2026-01-01',
+                      created_by: 'user-1',
+                      updated_by: 'user-1',
+                      trac_journal_images: [
+                        {
+                          id: 'img-1',
+                          post_id: 'post-1',
+                          organisation_id: 'org-1',
+                          created_at: '2026-01-01',
+                          updated_at: null,
+                          created_by: 'user-1',
+                          updated_by: null,
+                        },
+                      ],
+                    },
+                  ],
+                  error: null,
+                }),
+              }),
+            }),
+            delete: () => ({
+              eq: deleteEq,
+            }),
+          };
+        }
+        return {};
+      },
+    });
+
+    const { result } = renderHook(() => useJournalPosts(), { wrapper });
+    await waitFor(() => expect(result.current.posts).toHaveLength(1));
+    const post = result.current.posts[0]!;
+    await expect(result.current.deletePost(post)).rejects.toThrow(
+      'Storage is not available. Try again after signing in.'
+    );
+    expect(deleteEq).not.toHaveBeenCalled();
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Could not delete journal entry',
+        variant: 'destructive',
+      })
+    );
+    expect(mockToast).not.toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Journal entry deleted' })
+    );
   });
 
   it('deletes an image by id', async () => {

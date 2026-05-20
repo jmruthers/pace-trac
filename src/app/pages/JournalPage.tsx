@@ -24,6 +24,7 @@ function JournalPageContent() {
     deletePost,
     deleteImage,
     isMutating,
+    isDeletingPost,
     isDeletingImage,
     uploadProgress,
   } = useJournalPosts();
@@ -70,6 +71,13 @@ function JournalPageContent() {
     setEditingPost(null);
   }, [deletePost, editingPost]);
 
+  const handleDeletePostFromCard = useCallback(
+    async (post: JournalPost) => {
+      await deletePost(post);
+    },
+    [deletePost]
+  );
+
   if (isLoading || permissionsLoading) {
     return <LoadingSpinner />;
   }
@@ -102,7 +110,9 @@ function JournalPageContent() {
         canUpdate={canUpdate}
         canDelete={canDelete}
         onEdit={handleEdit}
+        onDeletePost={(post) => void handleDeletePostFromCard(post)}
         onDeleteImage={(imageId) => void deleteImage(imageId)}
+        isDeletingPost={isDeletingPost}
         isDeletingImage={isDeletingImage}
       />
 
