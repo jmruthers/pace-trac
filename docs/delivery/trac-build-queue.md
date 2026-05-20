@@ -46,10 +46,15 @@
 
 - authority: `docs/requirements/TR03-planning-logistics-requirements.md`
 - completion: `docs/delivery/TR03-slice-completion.md`
+- remediation: `docs/delivery/TR03-remediation-plan.md` (open until manual sign-off)
 - backend freeze: Frozen for this run — see `docs/delivery/trac-backend-ready-report.md` (PASS)
 - validate: PASS (6/6 checks)
-- tests: 37 passed (includes planning unit/integration + PlanningPage)
-- routes: `/planning` (transport, accommodation, activity tabs)
+- tests: 37 passed (planning enums/snapshots/validation, mutations integration, PlanningPage, nav)
+- routes: `/planning` — transport, accommodation, activity tabs; `read:page.planning`; writes via `usePageCan('planning', create|update|delete)`
+- acceptance criteria (TR03 §1–8): **implemented in code** — see completion record table; **sign-off pending** manual dev-db + P1 MCP record
+- testing (TR03 table): scenarios 1–2 **complete**; scenario 3 **partial** (mock-only permission test)
+- explicit exclusions: no `trac_itinerary_assignment` mutations; no cache-as-display-SoT; no BASE UX
+- open follow-up: manual verification checklist; dev-db MCP artifact; permission RTL test; optional Edit-button gating; invalidation/attachment tests
 
 ### SLICE-06 — Contacts
 
