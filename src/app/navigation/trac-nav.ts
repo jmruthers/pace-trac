@@ -5,7 +5,13 @@ import { withTracNavPermissions } from '@/app/navigation/trac-route-permissions'
 export { TRAC_PRIMARY_NAV_DEFINITIONS } from '@/app/navigation/trac-nav-definitions';
 
 /** Route paths registered in the current app build (expand as feature slices land). */
-export const TRAC_REGISTERED_ROUTE_PATHS = new Set<string>(['/', '/planning', '/contacts', '/journal']);
+export const TRAC_REGISTERED_ROUTE_PATHS = new Set<string>([
+  '/',
+  '/planning',
+  '/assignments',
+  '/contacts',
+  '/journal',
+]);
 
 /** @deprecated Use {@link TRAC_REGISTERED_ROUTE_PATHS}. Kept for SLICE-01 test references. */
 export const SLICE_01_REGISTERED_ROUTE_PATHS = TRAC_REGISTERED_ROUTE_PATHS;

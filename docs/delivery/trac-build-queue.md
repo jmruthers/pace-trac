@@ -22,7 +22,7 @@
 | SLICE-03 — Planning (logistics) | SLICE-01                                                   | built  |                |
 | SLICE-06 — Contacts             | SLICE-01                                                   | built  |                |
 | SLICE-08 — Journal              | SLICE-01                                                   | built  |                |
-| SLICE-04 — Assignments          | SLICE-01, SLICE-03                                         |        |                |
+| SLICE-04 — Assignments          | SLICE-01, SLICE-03                                         | built  |                |
 | SLICE-05 — Itinerary            | SLICE-01, SLICE-03, SLICE-04                               |        |                |
 | SLICE-07 — Costs & currency     | SLICE-01, SLICE-03, SLICE-04                               |        |                |
 | SLICE-09 — Risks                | SLICE-01, SLICE-06                                         |        |                |
@@ -80,7 +80,17 @@
 ### SLICE-04 — Assignments
 
 - authority: `docs/requirements/TR04-assignments-requirements.md`
+- completion: `docs/delivery/TR04-slice-completion.md`
+- remediation: `docs/delivery/TR04-remediation-plan.md` (open until manual sign-off)
 - backend freeze: Frozen for this run — see `docs/delivery/trac-backend-ready-report.md` (PASS)
+- validate: PASS (6/6 checks)
+- tests: 98 passed (`assignments.integration`, `headcount`, `AssignmentsPage`, `trac-nav`)
+- routes: `/assignments` — by-resource tabs, approved participant picker, headcount/capacity, over-capacity confirm; `planning` RBAC v1; deep links from Planning (`?kind=&resourceId=`)
+- acceptance criteria (TR04 §1–6): **implemented in code** — see completion record; **sign-off pending** manual dev-db (AC1–5) + MCP record (P1)
+- rebuild target: **complete** except itinerary deep links (**deferred to SLICE-05**; URL contract ready)
+- testing (TR04 table): scenarios 1–2 **complete**; scenario 3 **partial** (AccessDenied + hook; no RTL write-gating test)
+- explicit exclusions: no assignment CRUD on `/planning`; no service-role in browser
+- open follow-up: P0 manual verification; P1 dev-db MCP artifact; P2 permission/duplicate tests; P3 itinerary links in SLICE-05
 
 ### SLICE-05 — Itinerary
 
