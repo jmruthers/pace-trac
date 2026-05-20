@@ -1,0 +1,40 @@
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { render, screen, cleanup } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AssignmentsPage } from '@/app/pages/AssignmentsPage';
+
+vi.mock('@solvera/pace-core/rbac', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@solvera/pace-core/rbac')>();
+  return {
+    ...actual,
+    PagePermissionGuard: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    usePageCan: () => ({ can: true, isLoading: false }),
+    useSecureSupabase: () => null,
+    useResolvedScope: () => ({
+      eventId: 'evt-1',
+      organisationId: 'org-1',
+      isLoading: false,
+    }),
+  };
+});
+
+vi.mock('@/features/assignments/AssignmentsContent', () => ({
+  AssignmentsContent: () => <p>Assignments content mock</p>,
+}));
+
+describe('AssignmentsPage', () => {
+  afterEach(cleanup);
+
+  it('renders assignments content inside main when permitted', () => {
+    render(
+      <MemoryRouter>
+        <QueryClientProvider client={new QueryClient()}>
+          <AssignmentsPage />
+        </QueryClientProvider>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Assignments content mock')).toBeInTheDocument();
+  });
+});

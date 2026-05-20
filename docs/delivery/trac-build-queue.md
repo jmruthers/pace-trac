@@ -22,7 +22,7 @@
 | SLICE-03 — Planning (logistics) | SLICE-01                                                   | built  |                |
 | SLICE-06 — Contacts             | SLICE-01                                                   | built  |                |
 | SLICE-08 — Journal              | SLICE-01                                                   | built  |                |
-| SLICE-04 — Assignments          | SLICE-01, SLICE-03                                         |        |                |
+| SLICE-04 — Assignments          | SLICE-01, SLICE-03                                         | built  |                |
 | SLICE-05 — Itinerary            | SLICE-01, SLICE-03, SLICE-04                               |        |                |
 | SLICE-07 — Costs & currency     | SLICE-01, SLICE-03, SLICE-04                               |        |                |
 | SLICE-09 — Risks                | SLICE-01, SLICE-06                                         |        |                |
@@ -80,7 +80,12 @@
 ### SLICE-04 — Assignments
 
 - authority: `docs/requirements/TR04-assignments-requirements.md`
+- completion: `docs/delivery/TR04-slice-completion.md`
 - backend freeze: Frozen for this run — see `docs/delivery/trac-backend-ready-report.md` (PASS)
+- validate: PASS (6/6 checks)
+- tests: 98 passed (`assignments.integration`, `headcount`, `AssignmentsPage`, `trac-nav`)
+- routes: `/assignments` — by-resource tabs, approved participant picker, headcount/capacity, over-capacity confirm; `planning` RBAC v1
+- follow-up: manual dev-db verification per TR04-slice-completion.md
 
 ### SLICE-05 — Itinerary
 

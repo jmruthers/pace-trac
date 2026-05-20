@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Alert,
   Button,
@@ -68,6 +69,7 @@ export function ActivityList() {
                   {item.finish_location_display_name ?? item.finish_location_short_address ?? '—'}
                 </p>
                 {item.capacity != null ? <p>Capacity: {item.capacity}</p> : <p>Capacity: uncapped</p>}
+                <Link to={`/assignments?kind=activity&resourceId=${item.id}`}>Open assignments</Link>
                 <Button
                   type="button"
                   variant="outline"
