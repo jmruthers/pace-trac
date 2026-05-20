@@ -42,7 +42,7 @@ function createMocks() {
         };
       },
       delete: () => ({
-        eq: (_col: string, _val: string) => {
+        eq: () => {
           deleteEq();
           return Promise.resolve({ error: null });
         },

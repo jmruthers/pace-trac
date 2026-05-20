@@ -5,7 +5,7 @@ import { withTracNavPermissions } from '@/app/navigation/trac-route-permissions'
 export { TRAC_PRIMARY_NAV_DEFINITIONS } from '@/app/navigation/trac-nav-definitions';
 
 /** Route paths registered in SLICE-01 (expand as feature slices land). */
-export const SLICE_01_REGISTERED_ROUTE_PATHS = new Set<string>(['/', '/journal']);
+export const SLICE_01_REGISTERED_ROUTE_PATHS = new Set<string>(['/', '/planning', '/journal']);
 
 /**
  * Nav items whose href is registered in the current app build.

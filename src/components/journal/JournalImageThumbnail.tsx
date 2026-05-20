@@ -18,36 +18,42 @@ export function JournalImageThumbnail({ imageId, alt }: JournalImageThumbnailPro
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setError(null);
-    setUrl(null);
 
-    if (storageClient == null) {
-      setError('Image unavailable');
-      setLoading(false);
-      return;
-    }
+    void (async () => {
+      if (storageClient == null) {
+        if (!cancelled) {
+          setUrl(null);
+          setError('Image unavailable');
+          setLoading(false);
+        }
+        return;
+      }
 
-    const path = journalStorageObjectPath(imageId);
-    const bucket = storageClient.storage.from(JOURNAL_FILES_BUCKET);
-    const signed = bucket.createSignedUrl?.(path, SIGNED_URL_TTL_SEC);
+      const path = journalStorageObjectPath(imageId);
+      const bucket = storageClient.storage.from(JOURNAL_FILES_BUCKET);
+      const signed = bucket.createSignedUrl?.(path, SIGNED_URL_TTL_SEC);
 
-    if (signed == null) {
-      setError('Image unavailable');
-      setLoading(false);
-      return;
-    }
+      if (signed == null) {
+        if (!cancelled) {
+          setUrl(null);
+          setError('Image unavailable');
+          setLoading(false);
+        }
+        return;
+      }
 
-    void signed.then((result) => {
+      const result = await signed;
       if (cancelled) return;
       const signedUrl = result.data?.signedUrl ?? null;
       if (result.error != null || signedUrl == null) {
+        setUrl(null);
         setError('Could not load image');
       } else {
         setUrl(signedUrl);
+        setError(null);
       }
       setLoading(false);
-    });
+    })();
 
     return () => {
       cancelled = true;

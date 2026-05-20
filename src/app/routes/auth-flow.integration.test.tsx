@@ -87,10 +87,16 @@ vi.mock('@solvera/pace-core/components', async (importOriginal) => {
     return (
       <main aria-label={`${appName} Login Page`}>
         <h1>{`Sign in to ${appNameDisplay}`}</h1>
+        {/* Test double only — not production login UI */}
+        {/* eslint-disable-next-line pace-core-compliance/prefer-pace-core-form */}
         <form onSubmit={handleSubmit}>
+          {/* eslint-disable-next-line pace-core-compliance/prefer-pace-core-components -- test double */}
           <label htmlFor="email">Email</label>
+          {/* eslint-disable-next-line pace-core-compliance/prefer-pace-core-components -- test double */}
           <input id="email" name="email" type="email" required />
+          {/* eslint-disable-next-line pace-core-compliance/prefer-pace-core-components -- test double */}
           <label htmlFor="password">Password</label>
+          {/* eslint-disable-next-line pace-core-compliance/prefer-pace-core-components -- test double */}
           <input id="password" name="password" type="password" required />
           {checkingAccess ? <p role="status">Checking permissions...</p> : null}
           {submitError != null ? (
@@ -98,6 +104,7 @@ vi.mock('@solvera/pace-core/components', async (importOriginal) => {
               <strong>Sign-in error</strong> {submitError}
             </p>
           ) : null}
+          {/* eslint-disable-next-line pace-core-compliance/prefer-pace-core-components -- test double */}
           <button type="submit" disabled={isLoading}>
             {isLoading ? 'Signing in…' : 'Sign in'}
           </button>

@@ -27,6 +27,7 @@ import {
 } from '@/app/routes/route-redirects';
 import { ShellHomePage } from '@/app/pages/ShellHomePage';
 import { JournalPage } from '@/app/pages/JournalPage';
+import { PlanningPage } from '@/app/pages/PlanningPage';
 import { NotFoundPage } from '@/app/pages/NotFoundPage';
 import { TracNoEventFallback } from '@/app/shell/TracNoEventFallback';
 
@@ -159,6 +160,7 @@ export function AuthenticatedRoutes() {
           }
         >
           <Route index element={<ShellHomePage />} />
+          <Route path="planning" element={<PlanningPage />} />
           <Route path="journal" element={<JournalPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />

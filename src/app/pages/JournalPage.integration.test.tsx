@@ -144,6 +144,7 @@ function buildSupabaseMock(options?: { uploadFails?: boolean }) {
 }
 
 /** Test double: native inputs avoid duplicate-React issues with pace-core Form in vitest. */
+/* eslint-disable pace-core-compliance/prefer-pace-core-components -- intentional minimal editor stub */
 vi.mock('@/components/journal/JournalPostEditor', () => ({
   JournalPostEditor: ({
     open,

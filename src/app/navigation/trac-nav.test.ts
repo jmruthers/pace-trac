@@ -21,9 +21,9 @@ describe('trac-nav', () => {
   });
 
   it('enables nav links only for registered route paths', () => {
-    expect(SLICE_01_REGISTERED_ROUTE_PATHS.has('/planning')).toBe(false);
+    expect(SLICE_01_REGISTERED_ROUTE_PATHS.has('/planning')).toBe(true);
     expect(SLICE_01_REGISTERED_ROUTE_PATHS.has('/journal')).toBe(true);
     const labels = getEnabledTracNavItems().map((item) => item.label);
-    expect(labels).toEqual(['Journal']);
+    expect(labels).toEqual(['Planning', 'Journal']);
   });
 });

@@ -45,17 +45,7 @@ if (react?.configs?.recommended?.rules && reactHooks?.configs?.recommended?.rule
 }
 
 config.push({
-  ignores: [
-    'dist/**',
-    'coverage/**',
-    'node_modules/**',
-    'audit/**',
-    '**/*.cjs',
-    '**/*.test.ts',
-    '**/*.test.tsx',
-    '**/*.integration.test.ts',
-    '**/*.integration.test.tsx',
-  ],
+  ignores: ['dist/**', 'coverage/**', 'node_modules/**', 'audit/**', '**/*.cjs'],
 });
 
 module.exports = config;

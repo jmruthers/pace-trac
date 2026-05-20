@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEvents, useToast } from '@solvera/pace-core/hooks';
 import { useSecureSupabase, useStorageCapableClient } from '@solvera/pace-core/rbac';
@@ -40,7 +40,7 @@ export function useJournalPosts() {
   const organisationId =
     typeof selectedEvent?.organisation_id === 'string' ? selectedEvent.organisation_id : '';
   const userId = user?.id ?? '';
-  const journalQueryKey = ['journal-posts', eventId] as const;
+  const journalQueryKey = useMemo(() => ['journal-posts', eventId] as const, [eventId]);
 
   const queryEnabled =
     Boolean(eventId && organisationId && userId && secureSupabase != null && !eventLoading);

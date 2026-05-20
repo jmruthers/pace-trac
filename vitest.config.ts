@@ -21,6 +21,7 @@ export default defineConfig({
         'src/app/pages/**/*.tsx',
         'src/app/shell/**/*.tsx',
         'src/app/routes/**/*.ts',
+        'src/features/planning/**/*.ts',
         'src/hooks/journal/**/*.ts',
         'src/components/journal/**/*.tsx',
         'src/utils/journal-*.ts',

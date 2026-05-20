@@ -4,6 +4,7 @@ import { render, screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { JournalPostEditor } from '@/components/journal/JournalPostEditor';
 
+/* eslint-disable pace-core-compliance/prefer-pace-core-form, pace-core-compliance/prefer-pace-core-components -- Form stub for isolated editor tests */
 vi.mock('@solvera/pace-core/components', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@solvera/pace-core/components')>();
   return {

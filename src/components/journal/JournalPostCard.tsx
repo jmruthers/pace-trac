@@ -56,7 +56,11 @@ export function JournalPostCard({
           <CardFooter className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {images.map((image) => (
               <section key={image.id} className="grid gap-2">
-                <JournalImageThumbnail imageId={image.id} alt={`Attachment for ${post.title}`} />
+                <JournalImageThumbnail
+                  key={image.id}
+                  imageId={image.id}
+                  alt={`Attachment for ${post.title}`}
+                />
                 {canDelete && (
                   <Button
                     type="button"
