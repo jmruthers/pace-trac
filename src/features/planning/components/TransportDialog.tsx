@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   Alert,
   Button,
@@ -77,69 +77,64 @@ function transportToFormValues(transport: TransportRow): TransportFormValues {
   };
 }
 
-export function TransportDialog({
-  open,
-  onOpenChange,
+function initialTransportPlaces(transport: TransportRow | undefined): {
+  departure: PlanningPlaceValue | null;
+  arrival: PlanningPlaceValue | null;
+} {
+  if (transport == null) {
+    return { departure: null, arrival: null };
+  }
+  return {
+    departure: rowToPlanningPlace(
+      transport.departure_place_id,
+      transport.departure_display_name,
+      transport.departure_short_address,
+      transport.departure_coords,
+      transport.departure_timezone
+    ),
+    arrival: rowToPlanningPlace(
+      transport.arrival_place_id,
+      transport.arrival_display_name,
+      transport.arrival_short_address,
+      transport.arrival_coords,
+      transport.arrival_timezone
+    ),
+  };
+}
+
+interface TransportDialogFormProps {
+  mode: 'create' | 'edit';
+  transport?: TransportRow;
+  canSave: boolean;
+  canDelete: boolean;
+  onSave: TransportDialogProps['onSave'];
+  onDelete?: TransportDialogProps['onDelete'];
+  onClose: () => void;
+}
+
+function TransportDialogForm({
+  mode,
   transport,
+  canSave,
+  canDelete,
   onSave,
   onDelete,
-  mode,
-}: TransportDialogProps) {
-  const { can: canCreate } = usePageCan('planning', 'create');
-  const { can: canUpdate } = usePageCan('planning', 'update');
-  const { can: canDelete } = usePageCan('planning', 'delete');
-  const canSave = mode === 'create' ? canCreate : canUpdate;
-
-  const [sessionKey, setSessionKey] = useState(0);
-  const [formDefaults, setFormDefaults] = useState(createTransportDefaultValues);
-  const [departure, setDeparture] = useState<PlanningPlaceValue | null>(null);
-  const [arrival, setArrival] = useState<PlanningPlaceValue | null>(null);
+  onClose,
+}: TransportDialogFormProps) {
+  const initialPlaces = initialTransportPlaces(transport);
+  const [formDefaults] = useState(() =>
+    mode === 'create' || transport == null
+      ? createTransportDefaultValues()
+      : transportToFormValues(transport)
+  );
+  const [departure, setDeparture] = useState<PlanningPlaceValue | null>(initialPlaces.departure);
+  const [arrival, setArrival] = useState<PlanningPlaceValue | null>(initialPlaces.arrival);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    setSubmitError(null);
-    setSessionKey((key) => key + 1);
-    if (mode === 'create') {
-      setDeparture(null);
-      setArrival(null);
-      setFormDefaults(createTransportDefaultValues());
-      return;
-    }
-    if (transport) {
-      setDeparture(
-        rowToPlanningPlace(
-          transport.departure_place_id,
-          transport.departure_display_name,
-          transport.departure_short_address,
-          transport.departure_coords,
-          transport.departure_timezone
-        )
-      );
-      setArrival(
-        rowToPlanningPlace(
-          transport.arrival_place_id,
-          transport.arrival_display_name,
-          transport.arrival_short_address,
-          transport.arrival_coords,
-          transport.arrival_timezone
-        )
-      );
-      setFormDefaults(transportToFormValues(transport));
-    }
-  }, [open, mode, transport]);
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{mode === 'create' ? 'Add transport' : 'Edit transport'}</DialogTitle>
-        </DialogHeader>
-        <DialogBody>
-          <Form
-            key={sessionKey}
-            schema={transportFormSchema}
-            defaultValues={formDefaults}
+    <Form
+      schema={transportFormSchema}
+      defaultValues={formDefaults}
             onSubmit={async (values) => {
               setSubmitError(null);
               if (!departure?.displayName || !arrival?.displayName) {
@@ -157,7 +152,7 @@ export function TransportDialog({
               );
               try {
                 await onSave(payload);
-                onOpenChange(false);
+                onClose();
               } catch (error) {
                 setSubmitError(error instanceof Error ? error.message : 'Save failed');
               }
@@ -246,13 +241,13 @@ export function TransportDialog({
                       variant="destructive"
                       onClick={async () => {
                         await onDelete(transport.id);
-                        onOpenChange(false);
+                        onClose();
                       }}
                     >
                       Delete
                     </Button>
                   ) : null}
-                  <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                  <Button type="button" variant="outline" onClick={onClose}>
                     Cancel
                   </Button>
                   <Button type="submit" disabled={!canSave}>
@@ -262,6 +257,53 @@ export function TransportDialog({
               </section>
             )}
           </Form>
+  );
+}
+
+export function TransportDialog({
+  open,
+  onOpenChange,
+  transport,
+  onSave,
+  onDelete,
+  mode,
+}: TransportDialogProps) {
+  const { can: canCreate } = usePageCan('planning', 'create');
+  const { can: canUpdate } = usePageCan('planning', 'update');
+  const { can: canDelete } = usePageCan('planning', 'delete');
+  const canSave = mode === 'create' ? canCreate : canUpdate;
+
+  const [openGeneration, setOpenGeneration] = useState(0);
+  const handleOpenChange = useCallback(
+    (next: boolean) => {
+      if (next) setOpenGeneration((generation) => generation + 1);
+      onOpenChange(next);
+    },
+    [onOpenChange]
+  );
+
+  const formSessionKey =
+    mode === 'create' ? `create-${openGeneration}` : `edit-${transport?.id ?? 'none'}`;
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{mode === 'create' ? 'Add transport' : 'Edit transport'}</DialogTitle>
+        </DialogHeader>
+        <DialogBody>
+          {open ? (
+            <TransportDialogForm
+              key={formSessionKey}
+              mode={mode}
+              transport={transport}
+              canSave={canSave}
+              canDelete={canDelete}
+              onSave={onSave}
+              onDelete={onDelete}
+              onClose={() => handleOpenChange(false)}
+            />
+          ) : null}
         </DialogBody>
       </DialogContent>
     </Dialog>

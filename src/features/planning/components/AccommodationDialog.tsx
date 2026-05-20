@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   Alert,
   Button,
@@ -67,58 +67,52 @@ function accommodationToFormValues(accommodation: AccommodationRow): Accommodati
   };
 }
 
-export function AccommodationDialog({
-  open,
-  onOpenChange,
+function initialAccommodationLocation(
+  accommodation: AccommodationRow | undefined
+): PlanningPlaceValue | null {
+  if (accommodation == null) return null;
+  return rowToPlanningPlace(
+    accommodation.location_place_id,
+    accommodation.location_display_name,
+    accommodation.location_short_address,
+    accommodation.location_coords,
+    accommodation.location_timezone
+  );
+}
+
+interface AccommodationDialogFormProps {
+  mode: 'create' | 'edit';
+  accommodation?: AccommodationRow;
+  canSave: boolean;
+  canDelete: boolean;
+  onSave: AccommodationDialogProps['onSave'];
+  onDelete?: AccommodationDialogProps['onDelete'];
+  onClose: () => void;
+}
+
+function AccommodationDialogForm({
+  mode,
   accommodation,
+  canSave,
+  canDelete,
   onSave,
   onDelete,
-  mode,
-}: AccommodationDialogProps) {
-  const { can: canCreate } = usePageCan('planning', 'create');
-  const { can: canUpdate } = usePageCan('planning', 'update');
-  const { can: canDelete } = usePageCan('planning', 'delete');
-  const canSave = mode === 'create' ? canCreate : canUpdate;
-
-  const [sessionKey, setSessionKey] = useState(0);
-  const [formDefaults, setFormDefaults] = useState(createAccommodationDefaultValues);
-  const [location, setLocation] = useState<PlanningPlaceValue | null>(null);
+  onClose,
+}: AccommodationDialogFormProps) {
+  const [formDefaults] = useState(() =>
+    mode === 'create' || accommodation == null
+      ? createAccommodationDefaultValues()
+      : accommodationToFormValues(accommodation)
+  );
+  const [location, setLocation] = useState<PlanningPlaceValue | null>(
+    initialAccommodationLocation(accommodation)
+  );
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    setSubmitError(null);
-    setSessionKey((key) => key + 1);
-    if (mode === 'create') {
-      setLocation(null);
-      setFormDefaults(createAccommodationDefaultValues());
-      return;
-    }
-    if (accommodation) {
-      setLocation(
-        rowToPlanningPlace(
-          accommodation.location_place_id,
-          accommodation.location_display_name,
-          accommodation.location_short_address,
-          accommodation.location_coords,
-          accommodation.location_timezone
-        )
-      );
-      setFormDefaults(accommodationToFormValues(accommodation));
-    }
-  }, [open, mode, accommodation]);
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{mode === 'create' ? 'Add accommodation' : 'Edit accommodation'}</DialogTitle>
-        </DialogHeader>
-        <DialogBody>
-          <Form
-            key={sessionKey}
-            schema={accommodationFormSchema}
-            defaultValues={formDefaults}
+    <Form
+      schema={accommodationFormSchema}
+      defaultValues={formDefaults}
             onSubmit={async (values) => {
               setSubmitError(null);
               if (!location?.displayName) {
@@ -131,7 +125,7 @@ export function AccommodationDialog({
               );
               try {
                 await onSave(payload);
-                onOpenChange(false);
+                onClose();
               } catch (error) {
                 setSubmitError(error instanceof Error ? error.message : 'Save failed');
               }
@@ -199,13 +193,13 @@ export function AccommodationDialog({
                       variant="destructive"
                       onClick={async () => {
                         await onDelete(accommodation.id);
-                        onOpenChange(false);
+                        onClose();
                       }}
                     >
                       Delete
                     </Button>
                   ) : null}
-                  <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                  <Button type="button" variant="outline" onClick={onClose}>
                     Cancel
                   </Button>
                   <Button type="submit" disabled={!canSave}>
@@ -215,6 +209,53 @@ export function AccommodationDialog({
               </section>
             )}
           </Form>
+  );
+}
+
+export function AccommodationDialog({
+  open,
+  onOpenChange,
+  accommodation,
+  onSave,
+  onDelete,
+  mode,
+}: AccommodationDialogProps) {
+  const { can: canCreate } = usePageCan('planning', 'create');
+  const { can: canUpdate } = usePageCan('planning', 'update');
+  const { can: canDelete } = usePageCan('planning', 'delete');
+  const canSave = mode === 'create' ? canCreate : canUpdate;
+
+  const [openGeneration, setOpenGeneration] = useState(0);
+  const handleOpenChange = useCallback(
+    (next: boolean) => {
+      if (next) setOpenGeneration((generation) => generation + 1);
+      onOpenChange(next);
+    },
+    [onOpenChange]
+  );
+
+  const formSessionKey =
+    mode === 'create' ? `create-${openGeneration}` : `edit-${accommodation?.id ?? 'none'}`;
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{mode === 'create' ? 'Add accommodation' : 'Edit accommodation'}</DialogTitle>
+        </DialogHeader>
+        <DialogBody>
+          {open ? (
+            <AccommodationDialogForm
+              key={formSessionKey}
+              mode={mode}
+              accommodation={accommodation}
+              canSave={canSave}
+              canDelete={canDelete}
+              onSave={onSave}
+              onDelete={onDelete}
+              onClose={() => handleOpenChange(false)}
+            />
+          ) : null}
         </DialogBody>
       </DialogContent>
     </Dialog>

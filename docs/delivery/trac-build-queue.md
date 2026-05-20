@@ -23,7 +23,7 @@
 | SLICE-06 — Contacts             | SLICE-01                                                   | built  |                |
 | SLICE-08 — Journal              | SLICE-01                                                   | built  |                |
 | SLICE-04 — Assignments          | SLICE-01, SLICE-03                                         | built  |                |
-| SLICE-05 — Itinerary            | SLICE-01, SLICE-03, SLICE-04                               |        |                |
+| SLICE-05 — Itinerary            | SLICE-01, SLICE-03, SLICE-04                               | built  |                |
 | SLICE-07 — Costs & currency     | SLICE-01, SLICE-03, SLICE-04                               | built  |                |
 | SLICE-09 — Risks                | SLICE-01, SLICE-06                                         | built  |                |
 | SLICE-02 — Dashboard            | SLICE-01, SLICE-03, SLICE-04, SLICE-05, SLICE-06, SLICE-07 |        |                |
@@ -95,9 +95,19 @@
 ### SLICE-05 — Itinerary
 
 - authority: `docs/requirements/TR05-itinerary-requirements.md`
+- completion: `docs/delivery/TR05-slice-completion.md`
+- remediation: `docs/delivery/TR05-remediation-plan.md` (open until P0/P1 manual sign-off)
 - backend freeze: Frozen for this run — see `docs/delivery/trac-backend-ready-report.md` (PASS)
-- contract (backend-pre-satisfied): pace-core2 DB — logistics `SELECT` RLS Option A on `trac_transport`, `trac_activity`, `trac_accommodation` — PASS per backend report
-- contract (app lane): pace-core2 shared itinerary derivation helper (authority: CR25; installed package: CR26 at `@solvera/pace-core/itinerary`) — verify export at implementation; out of backend gate scope per backend report
+- contract (backend-pre-satisfied): Option A logistics `SELECT` — PASS per backend report
+- contract (app lane): `@solvera/pace-core/itinerary` (CR25) in `build-itinerary-model.ts`
+- validate: PASS (6/6 checks)
+- tests: 128+ passed (`build-itinerary-model`, `itinerary.integration`, `ItineraryContent.validation`, `ItineraryPage`, nav)
+- routes: `/itinerary` — planner / participant / day-visitor / dual tabs; read-only; `read:page.itinerary`
+- acceptance criteria (TR05 §1–7): **implemented in code** — see completion record; **sign-off pending** P0 manual + P1 MCP
+- rebuild target: **complete in code** after remediation (map legs, same-day stay copy, applicant viewer hook, deep links)
+- testing (TR05 table): scenarios 1–3 **complete**; validation RTL + precedence units **complete**
+- explicit exclusions: no mutations; no local CR25; no location-cache display
+- follow-up: P0 manual RLS + map empty; P1 dev-db MCP artifact; P3 planning tab deep link optional polish
 
 ### SLICE-07 — Costs & currency
 

@@ -9,6 +9,7 @@ export const TRAC_REGISTERED_ROUTE_PATHS = new Set<string>([
   '/',
   '/planning',
   '/assignments',
+  '/itinerary',
   '/contacts',
   '/costs',
   '/journal',
