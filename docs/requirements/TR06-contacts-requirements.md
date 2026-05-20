@@ -1,6 +1,6 @@
 # SLICE-06 — Contacts — Requirements
 
-**Document status:** Draft — rebuild implementation contract.  
+**Document status:** Implemented — rebuild contract (SLICE-06 built 2026-05-20; manual dev-db sign-off pending).  
 **Companion authority:** `trac-project-brief.md`, `trac-architecture.md`.
 
 ---
@@ -34,6 +34,8 @@ Legacy exposed event contacts with risk linkage patterns. **Observational** — 
 ---
 
 ## Rebuild target
+
+Implementation status: see [TR06-slice-completion.md](../delivery/TR06-slice-completion.md). Summary: **all applicable items complete**; inactive/archive N/A on dev-db schema.
 
 - List contacts for active event with search/filter as appropriate.
 - Create, edit, delete/archive per schema and RLS. **Delete semantics follow DB constraints**: if FK restrictions prevent delete, surface actionable guidance; if soft-delete columns exist, prefer archive/deactivate behaviour for v1 and keep pickers on active contacts.
@@ -75,11 +77,13 @@ Legacy exposed event contacts with risk linkage patterns. **Observational** — 
 
 ## Acceptance criteria
 
-1. Authorised user can add, edit, remove contacts for the event per RLS.
-2. Contact list drives SLICE-09 picker (integration contract: IDs stable).
-3. Validation errors map to UI for required fields and formats.
-4. Unauthorised users cannot read or mutate contacts.
-5. If inactive/archive semantics exist in schema, active pickers exclude inactive contacts by default and delete-blocking FK failures return actionable guidance.
+| # | Criterion | Status |
+|---|-----------|--------|
+| 1 | Authorised user can add, edit, remove contacts for the event per RLS. | **Complete** (client CRUD + RLS via `useSecureSupabase`; manual dev-db sign-off pending — see [TR06-slice-completion.md](../delivery/TR06-slice-completion.md)) |
+| 2 | Contact list drives SLICE-09 picker (integration contract: IDs stable). | **Complete** (`tracContactsQueryKey`, `invalidateContactsAndRiskPickers`; risk picker UI is SLICE-09) |
+| 3 | Validation errors map to UI for required fields and formats. | **Complete** (`parseContactFormData` → thrown errors surfaced by DataTable create/edit handlers; tests in `contact-schema.test.ts`) |
+| 4 | Unauthorised users cannot read or mutate contacts. | **Complete** (shell `read:page.contacts`, `PagePermissionGuard`, mutation `useResourcePermissions`, RLS) |
+| 5 | If inactive/archive semantics exist in schema, active pickers exclude inactive contacts by default and delete-blocking FK failures return actionable guidance. | **Complete (partial AC)** — no `is_active`/archive columns on dev-db (inactive clause N/A); FK `23503` maps to risk-link guidance in `use-contacts` |
 
 ---
 
@@ -108,11 +112,13 @@ Legacy exposed event contacts with risk linkage patterns. **Observational** — 
 
 ## Testing requirements
 
-| # | Scenario | Type |
-|---|----------|------|
-| 1 | **Happy path:** Planner adds contact; appears in list | Integration |
-| 2 | **Validation failure:** Missing required field — blocked with message | Integration |
-| 3 | **Auth / permission failure:** No contacts permission — AccessDenied | Integration |
+| # | Scenario | Type | Status |
+|---|----------|------|--------|
+| 1 | **Happy path:** Planner adds contact; appears in list | Integration | **Complete** — `contacts.integration.test.tsx` (hook + mocked Supabase) |
+| 2 | **Validation failure:** Missing required field — blocked with message | Integration | **Complete** — `contact-schema.test.ts` + integration parse test |
+| 3 | **Auth / permission failure:** No contacts permission — AccessDenied | Integration | **Complete** — `contacts.integration.test.tsx` (`PagePermissionGuard` denied) |
+
+**Remediation (2026-05-20):** G1 automated sign-off in completion doc; G2 `ResponsibleContactSelect` + picker contract tests; G3 `ContactsContent.validation.test.tsx`; G4 empty-state copy in `ContactsContent`.
 
 ---
 

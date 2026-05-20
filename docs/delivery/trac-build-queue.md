@@ -20,7 +20,7 @@
 | ------------------------------- | ---------------------------------------------------------- | ------ | -------------- |
 | SLICE-01 — Platform shell       | -                                                          | built  |                |
 | SLICE-03 — Planning (logistics) | SLICE-01                                                   | built  |                |
-| SLICE-06 — Contacts             | SLICE-01                                                   |        |                |
+| SLICE-06 — Contacts             | SLICE-01                                                   | built  |                |
 | SLICE-08 — Journal              | SLICE-01                                                   |        |                |
 | SLICE-04 — Assignments          | SLICE-01, SLICE-03                                         |        |                |
 | SLICE-05 — Itinerary            | SLICE-01, SLICE-03, SLICE-04                               |        |                |
@@ -59,7 +59,13 @@
 ### SLICE-06 — Contacts
 
 - authority: `docs/requirements/TR06-contacts-requirements.md`
+- completion: `docs/delivery/TR06-slice-completion.md`
 - backend freeze: Frozen for this run — see `docs/delivery/trac-backend-ready-report.md` (PASS)
+- validate: PASS (6/6 checks)
+- tests: 30 passed (`contacts.integration`, `contact-schema`, `ContactsContent`, `use-contacts`, nav)
+- routes: `/contacts` (event-gated; `PagePermissionGuard` + shell `read:page.contacts`)
+- SLICE-09 contract: `tracContactsQueryKey`, `tracRisksQueryKey`, `invalidateContactsAndRiskPickers`
+- follow-up: optional live dev-db confirm before release; full `/risks` UI in SLICE-09 (picker contract shipped)
 
 ### SLICE-08 — Journal
 

@@ -21,6 +21,7 @@ export default defineConfig({
         'src/app/pages/**/*.tsx',
         'src/app/shell/**/*.tsx',
         'src/app/routes/**/*.ts',
+        'src/features/contacts/**/*.{ts,tsx}',
         'src/features/planning/**/*.ts',
       ],
       exclude: [
@@ -28,6 +29,7 @@ export default defineConfig({
         '**/*.test.tsx',
         '**/*.integration.test.ts',
         '**/*.integration.test.tsx',
+        '**/types.ts',
         '**/index.ts',
         '**/dist/**',
         '**/coverage/**',
@@ -39,6 +41,7 @@ export default defineConfig({
         'src/app/pages/**/*.tsx': { statements: 70, lines: 70 },
         'src/app/shell/**/*.tsx': { statements: 70, lines: 70 },
         'src/app/routes/**/*.ts': { statements: 85, lines: 85 },
+        'src/features/contacts/**/*.{ts,tsx}': { statements: 70, lines: 70 },
       },
     },
   },

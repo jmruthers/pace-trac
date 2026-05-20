@@ -20,9 +20,11 @@ describe('trac-nav', () => {
     ]);
   });
 
-  it('SLICE-03 enables Planning nav when /planning is registered', () => {
+  it('enables Planning and Contacts nav for registered routes', () => {
     expect(SLICE_01_REGISTERED_ROUTE_PATHS.has('/planning')).toBe(true);
+    expect(SLICE_01_REGISTERED_ROUTE_PATHS.has('/contacts')).toBe(true);
     const items = getEnabledTracNavItems();
     expect(items.map((item) => item.href)).toContain('/planning');
+    expect(items.map((item) => item.href)).toContain('/contacts');
   });
 });
