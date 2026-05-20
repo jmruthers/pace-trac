@@ -20,8 +20,10 @@ describe('trac-nav', () => {
     ]);
   });
 
-  it('SLICE-01 exposes no nav links until domain routes register', () => {
+  it('enables nav links only for registered route paths', () => {
     expect(SLICE_01_REGISTERED_ROUTE_PATHS.has('/planning')).toBe(false);
-    expect(getEnabledTracNavItems()).toEqual([]);
+    expect(SLICE_01_REGISTERED_ROUTE_PATHS.has('/journal')).toBe(true);
+    const labels = getEnabledTracNavItems().map((item) => item.label);
+    expect(labels).toEqual(['Journal']);
   });
 });

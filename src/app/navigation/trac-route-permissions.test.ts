@@ -26,6 +26,10 @@ describe('trac-route-permissions', () => {
       pageName: 'planning',
       operation: 'read',
     });
+    expect(getTracRoutePermissionForPath('/journal')).toEqual({
+      pageName: 'journal',
+      operation: 'read',
+    });
     expect(getTracRoutePermissionForPath('/')).toBeUndefined();
   });
 
