@@ -8,6 +8,7 @@ export { TRAC_PRIMARY_NAV_DEFINITIONS } from '@/app/navigation/trac-nav-definiti
 export const TRAC_REGISTERED_ROUTE_PATHS = new Set<string>([
   '/',
   '/planning',
+  '/assignments',
   '/contacts',
   '/journal',
   '/risks',
