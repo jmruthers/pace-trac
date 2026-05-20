@@ -22,4 +22,14 @@ describe('parseContactFormData', () => {
       })
     ).toThrow(/valid email/i);
   });
+
+  it('rejects invalid phone format when provided', () => {
+    expect(() =>
+      parseContactFormData({
+        first_name: 'Alex',
+        surname: 'Lee',
+        phone_number: 'not-a-phone',
+      })
+    ).toThrow(/phone/i);
+  });
 });

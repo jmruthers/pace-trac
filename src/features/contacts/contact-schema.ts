@@ -1,4 +1,4 @@
-import { z } from '@solvera/pace-core/utils';
+import { phoneSchema, z } from '@solvera/pace-core/utils';
 import type { ContactFormData } from '@/features/contacts/types';
 
 const optionalTrimmedText = z
@@ -6,6 +6,11 @@ const optionalTrimmedText = z
   .trim()
   .optional()
   .transform((value) => (value === '' ? undefined : value));
+
+const optionalPhone = z.preprocess(
+  (value) => (typeof value === 'string' && value.trim() === '' ? '' : value),
+  phoneSchema
+).transform((value) => (value === '' ? undefined : value));
 
 const optionalEmail = z
   .string()
@@ -23,7 +28,7 @@ export const contactFormSchema = z.object({
   first_name: z.string().trim().min(1, 'First name is required'),
   surname: z.string().trim().min(1, 'Surname is required'),
   role: optionalTrimmedText,
-  phone_number: optionalTrimmedText,
+  phone_number: optionalPhone,
   email_address: optionalEmail,
 });
 
