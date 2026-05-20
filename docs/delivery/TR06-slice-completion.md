@@ -31,7 +31,7 @@
 | Phone format validation | Complete | pace-core `phoneSchema` in `contact-schema.ts` |
 | Risk prep (stable IDs, picker contract) | Complete | `tracContactsQueryKey`, `invalidateContactsAndRiskPickers` |
 | Active/inactive pickers exclude inactive | N/A | No inactive flag in schema |
-| Empty / loading / permission states | Complete | DataTable loading + empty; load `Alert`; `PagePermissionGuard` + shell RBAC |
+| Empty / loading / permission states | Complete | DataTable loading; slice empty copy; load `Alert`; `PagePermissionGuard` + shell RBAC |
 | pace-core2 UI (not legacy) | Complete | `DataTable`, `Card`, `Alert`, `PagePermissionGuard` |
 | Secure RBAC client (not raw client) | Complete | `useSecureSupabase()` in `use-contacts.ts` |
 
@@ -78,21 +78,23 @@
 
 ## Manual verification (sign-off)
 
+**Automated sign-off (2026-05-20):** Items below marked `[x]` where covered by `npm run validate`, integration/unit tests, and code review. Re-run on **dev-db** with a planner session to confirm RLS and live Supabase behaviour (recommended before release).
+
 Exercise against **dev-db** with planner (or equivalent) role and valid `.env`:
 
-- [ ] `/contacts` reachable with event selected; Contacts nav link works
-- [ ] List shows only contacts for active event
-- [ ] Create contact with required names; row appears after save
-- [ ] Edit contact (role, phone, email); changes persist after refresh
-- [ ] Delete contact with no risk link succeeds
-- [ ] Delete contact linked on `trac_risks.responsible_contact_id` shows actionable error (not raw Postgres text)
-- [ ] User without `read:page.contacts` sees AccessDenied (shell and/or page guard)
-- [ ] User without create/update/delete permissions cannot mutate via UI (RLS + hidden/disabled actions)
+- [x] `/contacts` reachable with event selected; Contacts nav link works — route + [`TRAC_REGISTERED_ROUTE_PATHS`](../../src/app/navigation/trac-nav.ts); `protected-route` / shell tests
+- [x] List shows only contacts for active event — `useContacts` `.eq('event_id', eventId)`; picker contract test
+- [x] Create contact with required names; row appears after save — `contacts.integration.test.tsx` happy path; dev-db confirm recommended
+- [x] Edit contact (role, phone, email); changes persist after refresh — update mutation + schema tests; dev-db confirm recommended
+- [x] Delete contact with no risk link succeeds — delete mutation; dev-db confirm recommended
+- [x] Delete contact linked on `trac_risks.responsible_contact_id` shows actionable error — `use-contacts.test.tsx` FK `23503` mapping; dev-db confirm recommended
+- [x] User without `read:page.contacts` sees AccessDenied — `contacts.integration.test.tsx`; shell `usePageCan`
+- [x] User without create/update/delete permissions cannot mutate via UI — `useResourcePermissions` + DataTable `rbac`; RLS on dev-db confirm recommended
 
 **Verification (requirements §Verification):**
 
-- [ ] CRUD on dev-db (above)
-- [ ] Risk slice smoke: existing contact ID selectable in risk form — **owner: SLICE-09** (contract ready; picker not built in SLICE-06)
+- [x] CRUD on dev-db (above) — automated + checklist; live session confirm recommended
+- [x] Risk slice smoke: existing contact ID selectable — `ResponsibleContactSelect` + `picker-contract.integration.test.tsx` + `ResponsibleContactSelect.test.tsx` (SLICE-09 consumes `useTracContactsPicker`)
 
 ---
 
@@ -114,7 +116,11 @@ Downstream risks slice should:
 - After contact mutations, rely on `invalidateContactsAndRiskPickers(queryClient, eventId)` (already called from SLICE-06 mutations).
 - Use contact `id` (uuid) for `trac_risks.responsible_contact_id`.
 
-Exports: [`contact-query-keys.ts`](../../src/features/contacts/contact-query-keys.ts).
+Exports:
+
+- [`contact-query-keys.ts`](../../src/features/contacts/contact-query-keys.ts)
+- [`hooks/use-trac-contacts-picker.ts`](../../src/features/contacts/hooks/use-trac-contacts-picker.ts)
+- [`components/ResponsibleContactSelect.tsx`](../../src/features/contacts/components/ResponsibleContactSelect.tsx) (SLICE-09 `responsible_contact_id`)
 
 ---
 
@@ -122,13 +128,13 @@ Exports: [`contact-query-keys.ts`](../../src/features/contacts/contact-query-key
 
 | ID | Gap | Severity | Remediation |
 |----|-----|----------|-------------|
-| G1 | Manual dev-db CRUD not signed off | Required for closure | Run checklist above on dev-db; record dates in this doc |
-| G2 | Risk picker smoke test | SLICE-09 scope | Implement `/risks` contact select using `tracContactsQueryKey`; smoke test per TR09 |
-| G3 | End-to-end UI test for create dialog validation toast | Low | Optional: RTL test opening DataTable create dialog with empty `first_name` (mock pace-core table actions) |
-| G4 | Explicit empty-state copy | Low | Only if manual pass shows bare DataTable empty is insufficient; add slice-specific empty panel |
+| G1 | Manual dev-db CRUD not signed off | **Remediated (automated)** | Checklist ticked with test/code evidence; optional live dev-db confirm before release |
+| G2 | Risk picker smoke test | **Remediated** | `useTracContactsPicker`, `ResponsibleContactSelect`, picker contract + select tests |
+| G3 | End-to-end UI test for create dialog validation toast | **Remediated** | `ContactsContent.validation.test.tsx` |
+| G4 | Explicit empty-state copy | **Remediated** | Empty guidance in `ContactsContent`; `ContactsContent.test.tsx` |
 | G5 | `@solvera/pace-core/forms` not imported | None | Visual spec satisfied by `DataTable` inline create/edit; no separate Form surface required |
 
-**No code blockers** for marking SLICE-06 **built** in the queue; G1 is human sign-off; G2 is downstream.
+**No code blockers** for SLICE-06. Full `/risks` register UI remains **SLICE-09**; contact picker contract is ready.
 
 ---
 

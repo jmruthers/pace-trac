@@ -67,6 +67,21 @@ describe('ContactsContent', () => {
     expect(screen.getByText('Planner')).toBeInTheDocument();
   });
 
+  it('shows empty guidance when there are no contacts', () => {
+    mockUseContacts.mockReturnValue({
+      contacts: [],
+      isLoading: false,
+      error: null,
+      refreshContacts: vi.fn(),
+      addContact: vi.fn(),
+      updateContact: vi.fn(),
+      deleteContact: vi.fn(),
+    });
+
+    render(<ContactsContent />);
+    expect(screen.getByText(/No contacts yet for this event/i)).toBeInTheDocument();
+  });
+
   it('shows error alert when list query fails', () => {
     mockUseContacts.mockReturnValue({
       contacts: [],

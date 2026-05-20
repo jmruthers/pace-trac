@@ -95,6 +95,9 @@ export function ContactsContent() {
             <p>{error}</p>
           </Alert>
         ) : null}
+        {!isLoading && error == null && contacts.length === 0 ? (
+          <p>No contacts yet for this event. Use Create in the table below to add one.</p>
+        ) : null}
         <Card>
           <DataTable
             data={contacts}

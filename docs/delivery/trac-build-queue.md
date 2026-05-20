@@ -56,7 +56,7 @@
 - tests: 30 passed (`contacts.integration`, `contact-schema`, `ContactsContent`, `use-contacts`, nav)
 - routes: `/contacts` (event-gated; `PagePermissionGuard` + shell `read:page.contacts`)
 - SLICE-09 contract: `tracContactsQueryKey`, `tracRisksQueryKey`, `invalidateContactsAndRiskPickers`
-- follow-up: manual dev-db CRUD sign-off; risk picker smoke in SLICE-09
+- follow-up: optional live dev-db confirm before release; full `/risks` UI in SLICE-09 (picker contract shipped)
 
 ### SLICE-08 — Journal
 

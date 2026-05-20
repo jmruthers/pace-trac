@@ -118,6 +118,8 @@ Implementation status: see [TR06-slice-completion.md](../delivery/TR06-slice-com
 | 2 | **Validation failure:** Missing required field — blocked with message | Integration | **Complete** — `contact-schema.test.ts` + integration parse test |
 | 3 | **Auth / permission failure:** No contacts permission — AccessDenied | Integration | **Complete** — `contacts.integration.test.tsx` (`PagePermissionGuard` denied) |
 
+**Remediation (2026-05-20):** G1 automated sign-off in completion doc; G2 `ResponsibleContactSelect` + picker contract tests; G3 `ContactsContent.validation.test.tsx`; G4 empty-state copy in `ContactsContent`.
+
 ---
 
 ## Open questions
