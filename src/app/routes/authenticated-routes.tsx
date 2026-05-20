@@ -31,6 +31,8 @@ import { JournalPage } from '@/app/pages/JournalPage';
 import { AssignmentsPage } from '@/app/pages/AssignmentsPage';
 import { PlanningPage } from '@/app/pages/PlanningPage';
 import { RisksPage } from '@/app/pages/RisksPage';
+import { CostsPage } from '@/app/pages/CostsPage';
+import { CurrencyRatesPage } from '@/app/pages/CurrencyRatesPage';
 import { NotFoundPage } from '@/app/pages/NotFoundPage';
 import { TracNoEventFallback } from '@/app/shell/TracNoEventFallback';
 
@@ -168,6 +170,8 @@ export function AuthenticatedRoutes() {
           <Route path="contacts" element={<ContactsPage />} />
           <Route path="journal" element={<JournalPage />} />
           <Route path="risks" element={<RisksPage />} />
+          <Route path="costs" element={<CostsPage />} />
+          <Route path="currency-rates" element={<CurrencyRatesPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>

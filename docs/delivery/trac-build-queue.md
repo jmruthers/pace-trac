@@ -24,7 +24,7 @@
 | SLICE-08 — Journal              | SLICE-01                                                   | built  |                |
 | SLICE-04 — Assignments          | SLICE-01, SLICE-03                                         | built  |                |
 | SLICE-05 — Itinerary            | SLICE-01, SLICE-03, SLICE-04                               |        |                |
-| SLICE-07 — Costs & currency     | SLICE-01, SLICE-03, SLICE-04                               |        |                |
+| SLICE-07 — Costs & currency     | SLICE-01, SLICE-03, SLICE-04                               | built  |                |
 | SLICE-09 — Risks                | SLICE-01, SLICE-06                                         | built  |                |
 | SLICE-02 — Dashboard            | SLICE-01, SLICE-03, SLICE-04, SLICE-05, SLICE-06, SLICE-07 |        |                |
 | SLICE-10 — Master Plan          | SLICE-01, SLICE-03, SLICE-04, SLICE-05, SLICE-06, SLICE-07 |        |                |
@@ -102,8 +102,17 @@
 ### SLICE-07 — Costs & currency
 
 - authority: `docs/requirements/TR07-costs-and-currency-requirements.md`
+- completion: `docs/delivery/TR07-slice-completion.md`
+- remediation: `docs/delivery/TR07-remediation-plan.md` (P0 manual open; P1–P3 code complete)
 - backend freeze: Frozen for this run — see `docs/delivery/trac-backend-ready-report.md` (PASS)
-- advisory: client-side cost rollup helper aligns with TR02/TR10 during frontend execution (not a Supabase RPC contract)
+- validate: PASS (6/6 checks) — re-run after compliance remediation
+- tests: costs-specific unit + integration (`cost-rollup`, `currency-format`, `currency-rate-schema`, `costs.integration`, `currency-rates.integration`, `currency-rates-page.integration`, `consumer-export`, nav/route)
+- routes: `/costs` (read rollup + R2 participant table), `/currency-rates` (RBAC CRUD); nav enables Costs only
+- shared rollup: `@/features/costs` for SLICE-02 / SLICE-10 consumers (`consumer-export.test.ts` smoke)
+- acceptance criteria (TR07 §1–5): **implemented in code** — see completion record; **sign-off pending** manual dev-db (AC1–3)
+- testing (TR07 table): scenarios 1–3, 3b **complete**; unit coverage **complete**
+- rebuild target: **complete** (including R2 per-participant UI)
+- open follow-up: P0 dev-db SQL + RLS sign-off per TR07-remediation-plan.md
 
 ### SLICE-09 — Risks
 

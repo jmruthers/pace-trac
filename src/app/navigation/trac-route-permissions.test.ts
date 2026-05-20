@@ -34,6 +34,14 @@ describe('trac-route-permissions', () => {
       pageName: 'risks',
       operation: 'read',
     });
+    expect(getTracRoutePermissionForPath('/costs')).toEqual({
+      pageName: 'costs',
+      operation: 'read',
+    });
+    expect(getTracRoutePermissionForPath('/currency-rates')).toEqual({
+      pageName: 'currency-rates',
+      operation: 'read',
+    });
     expect(getTracRoutePermissionForPath('/')).toBeUndefined();
   });
 
