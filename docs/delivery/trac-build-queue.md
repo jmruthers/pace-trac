@@ -27,7 +27,7 @@
 | SLICE-07 — Costs & currency     | SLICE-01, SLICE-03, SLICE-04                               | built  |                |
 | SLICE-09 — Risks                | SLICE-01, SLICE-06                                         | built  |                |
 | SLICE-02 — Dashboard            | SLICE-01, SLICE-03, SLICE-04, SLICE-05, SLICE-06, SLICE-07 |        |                |
-| SLICE-10 — Master Plan          | SLICE-01, SLICE-03, SLICE-04, SLICE-05, SLICE-06, SLICE-07 |        |                |
+| SLICE-10 — Master Plan          | SLICE-01, SLICE-03, SLICE-04, SLICE-05, SLICE-06, SLICE-07 | built  |                |
 
 
 ## Evidence
@@ -148,6 +148,14 @@
 ### SLICE-10 — Master Plan
 
 - authority: `docs/requirements/TR10-master-plan-requirements.md`
+- completion: `docs/delivery/TR10-slice-completion.md`
+- remediation: `docs/delivery/TR10-remediation-plan.md` (open until manual dev-db + print sign-off)
 - backend freeze: Frozen for this run — see `docs/delivery/trac-backend-ready-report.md` (PASS)
-- composite upstream: `docs/requirements/trac-architecture.md` §Composite contracts — Master Plan (contacts, planning, assignments, itinerary, costs per explicit composite contract)
+- validate: PASS (6/6)
+- tests: `master-plan.integration`, `format-event-date-range`, `trac-nav` (`/masterplan` registered)
+- routes: `/masterplan` — `PagePermissionGuard masterplan`; `requireEvent`; read-only composite; `GoogleMapsPlanningProvider`
+- composite upstream: `docs/requirements/trac-architecture.md` §Composite contracts — Master Plan (header, map, contacts, costs, itinerary)
+- acceptance criteria (TR10 §1–7): **implemented in code** — see completion record; **sign-off pending** P0 manual (print, dev-db RBAC, cost parity vs `/costs`)
+- shared rollup: `useCostRollupData` from SLICE-07 (no duplicate rollup logic)
+- follow-up: P0 manual checklist in TR10-slice-completion.md; SLICE-02 dashboard still queued
 
