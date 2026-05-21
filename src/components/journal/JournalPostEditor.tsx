@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import {
   Button,
+  Input,
   Dialog,
   DialogBody,
   DialogContent,
@@ -206,14 +207,15 @@ export function JournalPostEditor({
                     >
                       Choose images
                     </Button>
-                    {/* eslint-disable-next-line pace-core-compliance/prefer-pace-core-components -- file input */}
-                    <input
+                    <Input
                       ref={fileInputRef}
                       type="file"
                       accept="image/jpeg,image/png,image/gif,image/webp,image/heic,image/heif"
                       multiple
                       hidden
-                      onChange={(event) => handleFilesSelected(event.target.files)}
+                      onChange={() =>
+                        handleFilesSelected(fileInputRef.current?.files ?? null)
+                      }
                     />
                   </Label>
                   {pendingImages.length > 0 && (

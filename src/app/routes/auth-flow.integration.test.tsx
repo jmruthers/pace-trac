@@ -7,6 +7,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
 import { APP_NAME } from '@/app-config';
 import { TRAC_AUTHENTICATED_HOME_PATH } from '@/app/routes/route-redirects';
+import { StubButton, StubForm, StubInput, StubLabel } from '@/test/stub-elements';
 
 const mockSignIn = vi.fn();
 const mockNavigate = vi.fn();
@@ -88,27 +89,21 @@ vi.mock('@solvera/pace-core/components', async (importOriginal) => {
       <main aria-label={`${appName} Login Page`}>
         <h1>{`Sign in to ${appNameDisplay}`}</h1>
         {/* Test double only — not production login UI */}
-        {/* eslint-disable-next-line pace-core-compliance/prefer-pace-core-form */}
-        <form onSubmit={handleSubmit}>
-          {/* eslint-disable-next-line pace-core-compliance/prefer-pace-core-components -- test double */}
-          <label htmlFor="email">Email</label>
-          {/* eslint-disable-next-line pace-core-compliance/prefer-pace-core-components -- test double */}
-          <input id="email" name="email" type="email" required />
-          {/* eslint-disable-next-line pace-core-compliance/prefer-pace-core-components -- test double */}
-          <label htmlFor="password">Password</label>
-          {/* eslint-disable-next-line pace-core-compliance/prefer-pace-core-components -- test double */}
-          <input id="password" name="password" type="password" required />
+        <StubForm onSubmit={handleSubmit}>
+          <StubLabel htmlFor="email">Email</StubLabel>
+          <StubInput id="email" name="email" type="email" required />
+          <StubLabel htmlFor="password">Password</StubLabel>
+          <StubInput id="password" name="password" type="password" required />
           {checkingAccess ? <p role="status">Checking permissions...</p> : null}
           {submitError != null ? (
             <p role="alert">
               <strong>Sign-in error</strong> {submitError}
             </p>
           ) : null}
-          {/* eslint-disable-next-line pace-core-compliance/prefer-pace-core-components -- test double */}
-          <button type="submit" disabled={isLoading}>
+          <StubButton type="submit" disabled={isLoading}>
             {isLoading ? 'Signing in…' : 'Sign in'}
-          </button>
-        </form>
+          </StubButton>
+        </StubForm>
       </main>
     );
   }

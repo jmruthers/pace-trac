@@ -35,8 +35,6 @@ async function resolveApplicantApplication(
   const rows = (data ?? []).map(normalizeViewerApplication);
   for (const row of rows) {
     const { data: isApplicant, error: rpcError } = await secureSupabase.rpc(
-      // Supabase contract RPC (TR05 / Option A RLS); not a client-defined data_* name.
-      // eslint-disable-next-line pace-core-compliance/rpc-naming-pattern -- backend function name
       'base_application_is_applicant',
       {
         p_application_id: row.id,

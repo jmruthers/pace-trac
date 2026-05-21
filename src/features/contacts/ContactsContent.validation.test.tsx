@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
 import { parseContactFormData } from '@/features/contacts/contact-schema';
 import { ContactsContent } from '@/features/contacts/ContactsContent';
+import { StubButton } from '@/test/stub-elements';
 
 const mockUseContacts = vi.fn();
 
@@ -11,7 +12,6 @@ vi.mock('@/features/contacts/hooks/use-contacts', () => ({
 
 let capturedOnCreateRow: ((row: Record<string, unknown>) => void | Promise<void>) | undefined;
 
-/* eslint-disable pace-core-compliance/prefer-pace-core-components -- DataTable test stub */
 vi.mock('@solvera/pace-core/components', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@solvera/pace-core/components')>();
   return {
@@ -26,12 +26,12 @@ vi.mock('@solvera/pace-core/components', async (importOriginal) => {
       capturedOnCreateRow = onCreateRow;
       return (
         <section>
-          <button
+          <StubButton
             type="button"
             onClick={() => void onCreateRow?.({ first_name: '', surname: 'Test' })}
           >
             Simulate create
-          </button>
+          </StubButton>
           <ul>
             {(data as Array<{ first_name: string }>).map((row) => (
               <li key={row.first_name}>{row.first_name}</li>

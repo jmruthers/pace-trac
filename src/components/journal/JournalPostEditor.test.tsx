@@ -3,8 +3,8 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { JournalPostEditor } from '@/components/journal/JournalPostEditor';
+import { StubForm, StubInput, StubLabel } from '@/test/stub-elements';
 
-/* eslint-disable pace-core-compliance/prefer-pace-core-form, pace-core-compliance/prefer-pace-core-components -- Form stub for isolated editor tests */
 vi.mock('@solvera/pace-core/components', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@solvera/pace-core/components')>();
   return {
@@ -19,7 +19,7 @@ vi.mock('@solvera/pace-core/components', async (importOriginal) => {
       defaultValues?: Partial<T>;
     }) {
       return (
-        <form
+        <StubForm
           onSubmit={(event) => {
             event.preventDefault();
             onSubmit({
@@ -30,7 +30,7 @@ vi.mock('@solvera/pace-core/components', async (importOriginal) => {
           }}
         >
           {children({ control: {} })}
-        </form>
+        </StubForm>
       );
     },
     FormField: function MockFormField({
@@ -49,10 +49,10 @@ vi.mock('@solvera/pace-core/components', async (importOriginal) => {
         onBlur: vi.fn(),
       };
       return (
-        <label>
+        <StubLabel>
           {label}
-          {render != null ? render({ field }) : <input aria-label={label} defaultValue={field.value} />}
-        </label>
+          {render != null ? render({ field }) : <StubInput aria-label={label} defaultValue={field.value} />}
+        </StubLabel>
       );
     },
   };

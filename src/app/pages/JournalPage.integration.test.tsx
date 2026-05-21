@@ -10,6 +10,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { JournalPage } from '@/app/pages/JournalPage';
 import type { JournalPost } from '@/types/journal';
+import { StubButton, StubInput, StubLabel, StubTextarea } from '@/test/stub-elements';
 
 const mockUseUnifiedAuthContext = vi.fn();
 const mockUseEvents = vi.fn();
@@ -143,8 +144,7 @@ function buildSupabaseMock(options?: { uploadFails?: boolean }) {
   };
 }
 
-/** Test double: native inputs avoid duplicate-React issues with pace-core Form in vitest. */
-/* eslint-disable pace-core-compliance/prefer-pace-core-components -- intentional minimal editor stub */
+/** Test double: Stub* components avoid duplicate-React issues with pace-core Form in vitest. */
 vi.mock('@/components/journal/JournalPostEditor', () => ({
   JournalPostEditor: ({
     open,
@@ -172,34 +172,34 @@ vi.mock('@/components/journal/JournalPostEditor', () => ({
 
     return (
       <dialog open aria-label="Journal editor">
-        <label>
+        <StubLabel>
           Title
-          <input
+          <StubInput
             aria-label="Title"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
           />
-        </label>
-        <label>
+        </StubLabel>
+        <StubLabel>
           Content
-          <textarea
+          <StubTextarea
             aria-label="Content"
             value={content}
             onChange={(event) => setContent(event.target.value)}
           />
-        </label>
-        <label>
+        </StubLabel>
+        <StubLabel>
           Images
-          <input
+          <StubInput
             type="file"
             aria-label="Images"
             accept="image/png"
             onChange={(event) => setPendingFile(event.target.files?.[0] ?? null)}
           />
-        </label>
-        <button type="button" disabled={isSubmitting} onClick={() => void submit()}>
+        </StubLabel>
+        <StubButton type="button" disabled={isSubmitting} onClick={() => void submit()}>
           Save
-        </button>
+        </StubButton>
       </dialog>
     );
   },
