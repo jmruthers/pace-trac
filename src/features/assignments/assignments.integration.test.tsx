@@ -76,6 +76,12 @@ function createQueryWrapper() {
   };
 }
 
+function assignmentKey(
+  row: Pick<AssignmentRow, 'application_id' | 'resource_type' | 'resource_id'>
+): string {
+  return `${String(row.application_id)}:${String(row.resource_type)}:${String(row.resource_id)}`;
+}
+
 function buildAssignmentsMockSupabase() {
   let assignmentStore: AssignmentRow[] = [];
 
@@ -108,6 +114,20 @@ function buildAssignmentsMockSupabase() {
                       code: 'P0001',
                       message: 'trac_itinerary_assignment_validate_resource failed',
                     },
+                  };
+                }
+                const key = assignmentKey({
+                  application_id: String(row.application_id),
+                  resource_type: row.resource_type as AssignmentRow['resource_type'],
+                  resource_id: String(row.resource_id),
+                });
+                const duplicate = assignmentStore.some(
+                  (existing) => assignmentKey(existing) === key
+                );
+                if (duplicate) {
+                  return {
+                    data: null,
+                    error: { code: '23505', message: 'duplicate key value' },
                   };
                 }
                 const newRow: AssignmentRow = {
@@ -231,6 +251,26 @@ describe('assignments integration (SLICE-04)', () => {
   it('maps duplicate assignment constraint to friendly message', () => {
     const err = mapAssignmentError({ code: '23505', message: 'duplicate key' });
     expect(err.message).toMatch(/already assigned/i);
+  });
+
+  it('integration: duplicate assignment insert is rejected with friendly error', async () => {
+    const supabase = buildAssignmentsMockSupabase();
+    mockUseSecureSupabase.mockReturnValue(supabase);
+
+    const { result } = renderHook(() => useAssignmentMutations(), {
+      wrapper: createQueryWrapper(),
+    });
+
+    const input = {
+      application_id: APP_ID,
+      resource_type: 'activity' as const,
+      resource_id: ACTIVITY_ID,
+    };
+
+    await result.current.createAssignment(input);
+
+    await expect(result.current.createAssignment(input)).rejects.toThrow(/already assigned/i);
+    expect(supabase.getAssignments()).toHaveLength(1);
   });
 
   it('auth / permission failure: no planning permission shows AccessDenied', () => {

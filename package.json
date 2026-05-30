@@ -10,8 +10,8 @@
     "preview": "vite preview",
     "setup": "node node_modules/@solvera/pace-core/scripts/setup.cjs",
     "type-check": "tsc -b --noEmit",
-    "test": "vitest run -c vitest.config.ts --test-timeout=10000",
-    "test:coverage": "vitest run -c vitest.config.ts --coverage --coverage.provider=v8 --test-timeout=10000",
+    "test": "NODE_OPTIONS='--localstorage-file=.vitest-localstorage' vitest run -c vitest.config.ts --test-timeout=10000",
+    "test:coverage": "NODE_OPTIONS='--localstorage-file=.vitest-localstorage' vitest run -c vitest.config.ts --coverage --coverage.provider=v8 --test-timeout=10000",
     "validate": "node node_modules/@solvera/pace-core/scripts/validate.cjs",
     "validate-authority": "node node_modules/@solvera/pace-core/scripts/validate-authority.cjs",
     "env:dev": "node node_modules/@solvera/pace-core/scripts/switch-supabase-env.cjs dev",
@@ -20,10 +20,10 @@
     "migrate:link": "node node_modules/@solvera/pace-core/scripts/supabase-link-from-env.cjs",
     "migrate:link:dev": "node node_modules/@solvera/pace-core/scripts/supabase-link-from-env.cjs dev",
     "migrate:link:prod": "node node_modules/@solvera/pace-core/scripts/supabase-link-from-env.cjs prod",
-    "test:watch": "vitest -c vitest.config.ts --test-timeout=10000",
+    "test:watch": "NODE_OPTIONS='--localstorage-file=.vitest-localstorage' vitest -c vitest.config.ts --test-timeout=10000",
     "test:unit": "vitest run -c vitest.unit.config.ts",
     "test:integration": "vitest run -c vitest.integration.config.ts",
-    "test:changed": "vitest run -c vitest.config.ts --changed HEAD~1 --test-timeout=10000",
+    "test:changed": "NODE_OPTIONS='--localstorage-file=.vitest-localstorage' vitest run -c vitest.config.ts --changed HEAD~1 --test-timeout=10000",
     "test:coverage:fast": "vitest run -c vitest.unit.config.ts --coverage --coverage.provider=v8"
   },
   "dependencies": {

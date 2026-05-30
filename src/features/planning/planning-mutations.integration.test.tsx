@@ -1,8 +1,12 @@
 /**
  * TR03 integration: transport create validation, permission guard behaviour (mocked).
  */
-import { describe, expect, it, vi } from 'vitest';
-import { buildTransportPayload } from '@/features/planning/build-payloads';
+import { describe, expect, it } from 'vitest';
+import {
+  buildAccommodationPayload,
+  buildActivityPayload,
+  buildTransportPayload,
+} from '@/features/planning/build-payloads';
 import { validateTracStatusForSubmit, validateCapacityForSubmit } from '@/features/planning/validation';
 import type { TransportFormValues } from '@/features/planning/validation';
 
@@ -55,9 +59,59 @@ describe('planning mutations integration', () => {
     expect(statusCheck.message).toBeTruthy();
   });
 
-  it('permission failure: usePageCan create false blocks save button state', async () => {
-    const usePageCan = vi.fn().mockReturnValue({ can: false, isLoading: false });
-    const canCreate = usePageCan('planning', 'create').can;
-    expect(canCreate).toBe(false);
+  it('builds accommodation and activity payloads with location snapshots', () => {
+    const accommodation = buildAccommodationPayload(
+      {
+        name: 'Harbour Hotel',
+        check_in_time: new Date('2026-06-02T15:00:00Z'),
+        check_out_time: new Date('2026-06-04T10:00:00Z'),
+        status: 'planned',
+        notes: '',
+        booking_reference: '',
+        currency: 'AUD',
+        individual_cost: null,
+        group_cost: 500,
+        capacity: 40,
+        location_label: 'Circular Quay',
+      },
+      {
+        placeId: 'hotel-place',
+        displayName: 'Circular Quay',
+        coordinates: { lat: -33.86, lng: 151.21 },
+        timezone: 'Australia/Sydney',
+      }
+    );
+
+    expect(accommodation.row.name).toBe('Harbour Hotel');
+    expect(accommodation.row.location_place_id).toBe('hotel-place');
+    expect(accommodation.places).toHaveLength(1);
+
+    const activity = buildActivityPayload(
+      {
+        name: 'Harbour tour',
+        start_time: new Date('2026-06-02T10:00:00Z'),
+        finish_time: new Date('2026-06-02T18:00:00Z'),
+        status: 'confirmed',
+        notes: '',
+        booking_reference: '',
+        currency: 'AUD',
+        individual_cost: 25,
+        group_cost: 0,
+        capacity: 30,
+        start_location_label: 'Darling Harbour',
+        finish_location_label: '',
+      },
+      {
+        placeId: 'start-place',
+        displayName: 'Darling Harbour',
+        coordinates: { lat: -33.87, lng: 151.2 },
+        timezone: 'Australia/Sydney',
+      },
+      null
+    );
+
+    expect(activity.row.name).toBe('Harbour tour');
+    expect(activity.row.start_location_place_id).toBe('start-place');
+    expect(activity.places).toHaveLength(1);
   });
 });

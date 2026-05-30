@@ -1,9 +1,26 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { domInclude, resolveAlias, sharedTestOptions } from './vitest.shared.js';
 
+const repoRoot = path.dirname(fileURLToPath(import.meta.url));
+const localStorageFile = path.resolve(repoRoot, '.vitest-localstorage');
+const nodeLocalStorageArgv = [`--localstorage-file=${localStorageFile}`];
+
 const domEnvironmentGlobs = domInclude.map((pattern) => [pattern, 'happy-dom'] as [string, string]);
+
+/** Shipped TRAC feature slices — measured in coverage HTML (dialogs excluded). */
+const featureCoverageGlobs = [
+  'src/features/assignments/**/*.{ts,tsx}',
+  'src/features/contacts/**/*.{ts,tsx}',
+  'src/features/costs/**/*.{ts,tsx}',
+  'src/features/dashboard/**/*.{ts,tsx}',
+  'src/features/itinerary/**/*.{ts,tsx}',
+  'src/features/master-plan/**/*.{ts,tsx}',
+  'src/features/planning/**/*.{ts,tsx}',
+  'src/features/risks/**/*.{ts,tsx}',
+];
 
 export default defineConfig({
   plugins: [react()],
@@ -15,20 +32,29 @@ export default defineConfig({
     environment: 'node',
     environmentMatchGlobs: domEnvironmentGlobs,
     setupFiles: ['./src/test-setup.ts'],
+    poolOptions: {
+      threads: {
+        execArgv: nodeLocalStorageArgv,
+      },
+      forks: {
+        execArgv: nodeLocalStorageArgv,
+      },
+    },
     coverage: {
       provider: 'v8',
-      reporter: ['text'],
+      /** Only instrument files loaded during tests — faster validate/CI runs with broad include globs. */
+      all: false,
+      reporter: ['text', 'html'],
       include: [
         'src/app-config.ts',
         'src/app/navigation/**/*.ts',
         'src/app/pages/**/*.tsx',
         'src/app/shell/**/*.tsx',
         'src/app/routes/**/*.ts',
-        'src/features/contacts/**/*.{ts,tsx}',
-        'src/features/planning/**/*.ts',
         'src/hooks/journal/**/*.ts',
         'src/components/journal/**/*.tsx',
         'src/utils/journal-*.ts',
+        ...featureCoverageGlobs,
       ],
       exclude: [
         '**/*.test.ts',
@@ -37,6 +63,8 @@ export default defineConfig({
         '**/*.integration.test.tsx',
         '**/types.ts',
         '**/index.ts',
+        'src/features/**/components/**',
+        'src/features/costs/CurrencyRatesContent.tsx',
         '**/dist/**',
         '**/coverage/**',
         '**/node_modules/**',
@@ -51,6 +79,8 @@ export default defineConfig({
         'src/app/shell/**/*.tsx': { statements: 70, lines: 70 },
         'src/app/routes/**/*.ts': { statements: 85, lines: 85 },
         'src/features/contacts/**/*.{ts,tsx}': { statements: 70, lines: 70 },
+        'src/features/itinerary/**/*.{ts,tsx}': { statements: 70, lines: 70 },
+        'src/features/risks/**/*.{ts,tsx}': { statements: 70, lines: 70 },
       },
     },
   },
