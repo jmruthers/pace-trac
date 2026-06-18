@@ -1,0 +1,53 @@
+---
+description: Pass 1 — audit TRAC requirement slices against pace-prototype layout; update docs only
+globs: docs/requirements/TR*.md, docs/delivery/requirements-audit-queue.md
+alwaysApply: false
+---
+
+# TRAC requirements audit — pass 1 (docs only)
+
+When the user asks to continue TRAC pass 1, audit a TR slice, or references `requirements-audit-queue.md` in pace-trac2, follow this protocol.
+
+## Scope
+
+- **In scope:** Update requirement slices under `docs/requirements/TR*.md` and status rows in `docs/delivery/requirements-audit-queue.md`.
+- **Out of scope:** Any edit under `src/`, tests, migrations, CSS, or pass-2 implementation. Do not update [trac-build-queue.md](../docs/delivery/trac-build-queue.md) build status.
+
+## Authority
+
+| Source | Role |
+|--------|------|
+| `pace-prototype/apps/pace-trac/` | **Layout authority** — event landing, overview/dashboard cards, planning, itinerary, costs, risks, contacts, journal |
+| `pace-trac2/src/` | **Read-only** — note drift; requirements target prototype layout |
+| `pace-core2/packages/core/docs/standards/` | **Component and markup rules** |
+| [trac-architecture.md](../docs/requirements/trac-architecture.md) | Route ownership — use for **Implementation delta (pass 2)** when prototype routes differ |
+
+Prototype is **layout only**. Do not copy hash router, mock store, or Tweaks panel as mandates.
+
+## Prototype vs production (common deltas)
+
+- Assignments: prototype uses **inline assignment on `PlanningItemPage`**; production has **`/assignments`** — spec prototype layout; note route split in pass-2 delta.
+- Master plan: prototype uses **Itinerary full mode**; production may use **`/masterplan`** — both belong in TR10 visual spec with delta note.
+- Event selector: prototype **`TracLandingPage`** mirrors BASE shell landing pattern.
+
+## Procedure (each slice)
+
+1. Read [requirements-audit-queue.md](../docs/delivery/requirements-audit-queue.md); select the lowest `audit_order` with `audit_status = Pending` (or resume `In progress`).
+2. Set row to `In progress`.
+3. Read the requirement doc, `prototype_refs`, and skim implementation hints (read-only).
+4. Audit layout gaps: planning tabs, full-page item editor, itinerary modes, cost rollups display, risk register, journal publish flow, overview KPI/launcher cards.
+5. Update **only** the requirement slice:
+   - **Visual specification** (or equivalent)
+   - Layout-driven acceptance criteria
+   - **Prototype reference:** line with correct paths
+   - **Implementation delta (pass 2)** for route or IA differences
+6. Set row to `Done`.
+7. Continue to next Pending slice unless the user capped the run.
+
+## Dry run
+
+Report gaps in chat only; do not modify files.
+
+## Chaining
+
+After marking Done, proceed to the next Pending slice without asking the user to repeat the audit prompt.

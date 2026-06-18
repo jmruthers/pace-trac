@@ -27,6 +27,8 @@
 
 Implement **`/itinerary`** as a **time-ordered**, **person-aware** read experience: **planners** see schedule, map, and signals across the event; **participants** (with `base_application`) see **their** assigned transport/stays/activities per **RLS** on `trac_itinerary_assignment`. **Day visitors / no application:** explain that personalised logistics are unavailable — avoid empty confusing screens. **Dual role:** prefer **one** `/itinerary` with sections/tabs rather than duplicating routes (architecture). Deep links interoperate with **Planning** and **Assignments** without owning their mutations. For member-facing access, the same participant contract may also be surfaced from **pace-portal2** for a participant already scoped there; this does **not** create a second TRAC route.
 
+- Prototype reference: schedule and view modes in `pace-prototype/apps/pace-trac/pages/ItineraryPage.jsx` (`mode` schedule — not `full`; see TR10 for master plan mode).
+
 TRAC remains the **business/source authority** for itinerary rules. The executable pure derivation logic for participant narrowing, day-entry expansion, timezone precedence, in-day ordering, and visible date-range/day grouping is consumed from **pace-core2 CR25** rather than re-implemented locally in TRAC.
 
 ---
@@ -112,6 +114,15 @@ TRAC remains the **business/source authority** for itinerary rules. The executab
 6. Multi-day transport, activity, and accommodation rows follow the documented day-entry and in-day ordering rules.
 7. TRAC consumes the shared pure **pace-core2 CR25** helper for participant narrowing, day-entry expansion, timezone precedence, in-day ordering, and visible date range/day grouping rather than re-implementing those derivation rules locally.
 
+### Layout (prototype parity targets — schedule modes only)
+
+- [ ] `PageHeader` title **Itinerary**; subtitle varies by active view mode.
+- [ ] View switch: **Planner view** | **Participant view** | **Master plan** (prototype third mode navigates to `#/itinerary/full` — TR10).
+- [ ] Planner view: day-grouped sections (`fmtDayHeading`); `ItinRow` entries with time column, resource glyph, name, meta lines, status badge on right.
+- [ ] Participant view: info banner + participant `Select`; filtered entries only for assigned resources; assignment notes on rows when present.
+- [ ] Empty day or no entries: `EmptyState` with guidance.
+- [ ] Timezone caption in view switch footer (event timezone + offset).
+
 ---
 
 ## API / Contract
@@ -127,9 +138,48 @@ TRAC remains the **business/source authority** for itinerary rules. The executab
 
 ## Visual specification
 
-- Timeline or grouped-by-day layout; map pane optional split desktop / stacked mobile.
-- Distinct visual treatment for planner vs participant (badge or section title).
-- Accessibility: list and map have non-map alternatives for key info.
+### Page chrome
+
+- `PageHeader`: breadcrumb Events → event → **Itinerary**; dynamic subtitle:
+  - Planner: full event schedule grouped by day.
+  - Participant: personal schedule — assigned rows only.
+  - Master plan: printable document copy (see [TR10](./TR10-master-plan-requirements.md)).
+- Header action when master mode: **Print master plan** (`window.print()`).
+
+### View switch (`itin-viewswitch`)
+
+Three-way `role-toggle`:
+
+| Mode | Prototype label | Route |
+|------|-----------------|-------|
+| Planner | Planner view | `#/events/:code/itinerary` |
+| Participant | Participant view | same URL, client state |
+| Master | Master plan | `#/events/:code/itinerary/full` |
+
+Footer caption: timezone disclaimer for schedule modes; **Printable single-document plan** for master.
+
+### Planner schedule layout
+
+- Days as vertical sections with day heading.
+- Each entry (`itin-row`): time stack (start – end), mode/resource glyph, title + kind (check-in/out for accommodation), meta (type, transport number, location lines), `StatusBadge` in side column.
+- Empty: `EmptyState` when no scheduled rows.
+
+### Participant schedule layout
+
+- Info alert banner explaining filtered personal view.
+- Participant picker (`Select`) above day list — only members with assignments.
+- Same `ItinRow` structure; optional assignment note badge on row.
+- Empty when participant has no assignments.
+
+### Map (pass 2)
+
+- Prototype schedule view is list-first; map pane optional in production when snapshot coordinates exist — align with CR25 read model, not live Places.
+
+### Implementation delta (pass 2)
+
+- Prototype builds day entries with simplified `buildEntries` (not full CR25); production must use **CR25** for derivation per architecture.
+- Master plan mode in prototype is same component with `MasterPlanDoc` — production may use `/masterplan` route (TR10).
+- Prototype participant picker uses mock member pool; production uses approved `base_application` rows + RLS Option A.
 
 ---
 

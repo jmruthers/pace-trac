@@ -25,7 +25,9 @@
 
 ## Overview
 
-Implement **logistics CRUD** for **transport**, **accommodation**, and **activity** under the selected event: typed **`trac_status`** and **`transport_mode`**, **capacity** fields (nullable = uncapped per DEC-058), **supporting-document attachments**, and **location snapshots** (DEC-083) written at save time using the global **`trac_location_cache`** (DEC-080) for new lookups — **not** live-joined as display truth. Planners manage status, capacity, places, and supporting docs; **person assignments** are edited only on `/assignments`.
+Implement **logistics CRUD** for **transport**, **accommodation**, and **activity** under the selected event: typed **`trac_status`** and **`transport_mode`**, **capacity** fields (nullable = uncapped per DEC-058), **supporting-document attachments**, and **location snapshots** (DEC-083) written at save time using the global **`trac_location_cache`** (DEC-080) for new lookups — **not** live-joined as display truth. Planners manage status, capacity, places, and supporting docs; **person assignments** are edited only on `/assignments` (prototype: inline on planning item page — see TR04).
+
+- Prototype reference: list, new, and item editors in `pace-prototype/apps/pace-trac/pages/PlanningPage.jsx` (`PlanningPage`, `PlanningNewPage`, `PlanningItemPage`).
 
 ---
 
@@ -105,6 +107,18 @@ Authoritative narrative: **`trac-architecture.md`** (database-backed design, DEC
 7. Supporting-document upload/access/delete works from logistics rows using the standard secure file lifecycle, and surfaces storage/reference cleanup failures explicitly.
 8. Successful logistics mutations invalidate dependent itinerary/cost/dashboard/master-plan reads explicitly; refresh correctness does not depend on timing delays or custom browser events.
 
+### Layout (prototype parity targets)
+
+- [ ] `PageHeader` with breadcrumb Events → event code → Planning; title **Planning**; primary **Add item** opens new-item route for active type tab.
+- [ ] View switch: **By type** (default) vs **By day** chronological grouping (`itin-viewswitch` / `role-toggle` pattern).
+- [ ] **By type:** `Tabs` for transport / accommodation / activity with per-tab counts; `DataTable` with route/name, start/end times, capacity meter, cost (event total + per-person subline), inline status select, open + delete row actions.
+- [ ] Row name opens **full-page item editor** (not modal); **Add item** opens **full-page new** route with type preselected from active tab.
+- [ ] **By day:** day-grouped list with same row affordances as type view.
+- [ ] **New item page:** `BackLink`; type toggle (transport / accommodation / activity); `ResourceFields` grid in section card; bottom `PageSaveBar` with cancel + **Create {type}** (not generic Submit).
+- [ ] **Item page:** two-column `item-layout` — **Details** section card with `ResourceFields`; **no assignment panel on this route in production** (prototype shows inline `AssignPanel` — TR04).
+- [ ] Item page shows conditional `PageSaveBar` when dirty (Save + Discard changes); delete with confirmation dialog.
+- [ ] Empty states per resource type with CTA to add first item; delete confirmation warns assignments will be removed.
+
 ---
 
 ## API / Contract
@@ -120,10 +134,43 @@ Authoritative narrative: **`trac-architecture.md`** (database-backed design, DEC
 
 ## Visual specification
 
-- Three-way navigation (tabs or sidebar) consistent with pace-core2.
-- List + detail pattern or modal dialogs — match platform density; clear **status** badges using design tokens.
-- Location picker: map or autocomplete per platform; show **snapshot** address/name on row after save.
-- Desktop/mobile: dense grids may split by resource type on desktop, but forms, lists, and attachments must collapse cleanly on smaller screens without hiding core actions.
+### Planning list (`/planning`)
+
+- `PageHeader`: breadcrumb trail; title **Planning**; subtitle describing logistics workbench; header action **Add item** (navigates to new route for current tab type).
+- **View switch** row below header:
+  - Toggle **By type** | **By day** with helper caption (grouped by resource type vs chronological all rows).
+- **By type mode:**
+  - `Tabs` / `TabsList` / `TabsTrigger` for transport, accommodation, activity — each shows count badge.
+  - `DataTable` columns: name/route (with mode glyph or resource glyph + subline), start/end datetime columns, **CapacityMeter** (assigned vs capacity, compact), cost column (event total in base currency + per-person or “group only”), inline **status** control (`StatusBadge` tone + select), row actions (open, delete).
+  - Empty state per type with icon, copy, and **Add {singular type}** primary action.
+- **By day mode:** chronological day sections (`PlanningDayView`) — each row links to item page; status and delete affordances preserved.
+- Delete uses `ConfirmationDialog` (destructive) warning that assignments will be removed.
+
+### New item (full-page route — prototype `#/events/:code/planning/new/:type`)
+
+- `BackLink` → planning list.
+- `PageHeader`: trail includes **New item**; title **Add item**.
+- Section card: **Type** toggle (three resource types with glyphs); `ResourceFields` grid (`dlg-grid`) — name, mode (transport), datetimes, places, costs, capacity, booking reference, notes, documents as applicable.
+- Footer: `PageSaveBar` — Cancel returns to list; primary **Create {singular type}** disabled when name empty; on success navigate to item page.
+
+### Item editor (full-page route — prototype `#/events/:code/planning/:itemId`)
+
+- `PageHeader`: dynamic title = resource name; subtitle shows type label + start time; right: status badge + **Delete**.
+- **Details** section card: `ResourceFields` for inline edit; subtitle explains Save-on-footer behaviour.
+- **Assignment panel:** prototype embeds `AssignPanel` beside details (headcount readout, search, participant list, notes) — **production assigns on `/assignments`** ([TR04](./TR04-assignments-requirements.md)).
+- `PageSaveBar` appears only when form dirty: **Discard changes** + **Save** (exact label).
+- Not-found state: 404 glyph, **Item not found**, back to planning.
+
+### Components (pace-core targets)
+
+- `PageHeader`, `Breadcrumb`, `Tabs`, `DataTable`, `Button`, `ConfirmationDialog`, `Card` slots, `Form`/`FormField`/`useZodForm` for field grids, `PageSaveBar` or `SaveActions` in footers, `CapacityMeter`, `StatusBadge`, location field group per platform.
+
+### Implementation delta (pass 2)
+
+- Prototype uses hash routes `/events/:code/planning/new/:type` and `/events/:code/planning/:itemId`; production uses flat `/planning` with nested routes or equivalent pass-2 routing — register in architecture before implementation.
+- Prototype inline **AssignPanel** on item page; production **must not** mutate assignments on `/planning` — dedicated `/assignments` route (TR04).
+- Prototype inline status select in list cells; production may use read-only badge + edit on item page — preserve quick status change if product requires parity.
+- Prototype `PlanningDayView` is a distinct layout mode; ensure pass-2 implements or documents deferral.
 
 ---
 

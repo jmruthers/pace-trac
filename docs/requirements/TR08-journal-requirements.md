@@ -25,6 +25,8 @@
 
 Event **journal** at `/journal`: **posts** with optional **images**, backed by **`trac_journal_posts`** and **`trac_journal_images`** + Supabase Storage. **RLS:** Both tables use `check_rbac_permission_with_context` with page key **`journal`** and TRAC app id (architecture — policy hygiene migration). **Critical:** `trac_journal_posts` passes `event_id` to permission checker; **`trac_journal_images` has no `event_id`** — pass `NULL` for event param in policy; **app must load images only via posts** (query posts filtered by `event_id`, join images), never a bare images list for event UI.
 
+- Prototype reference: list, new, and item editors in `pace-prototype/apps/pace-trac/pages/JournalPage.jsx` (`JournalPage`, `JournalNewPage`, `JournalItemPage` — full-page routes, draft/publish dual actions).
+
 ---
 
 ## Rebuild target
@@ -89,6 +91,13 @@ Event **journal** at `/journal`: **posts** with optional **images**, backed by *
 | 4 | Unauthorised users cannot read or write posts/images for the event. | **Complete** (app); **manual** (dev-db RLS) | `PagePermissionGuard pageName="journal"`; shell `/journal` → `journal` read; writes enforced by RLS + permission-gated UI. |
 | 5 | Behaviour matches RLS tests for `journal` page key. | **Complete** (app); **manual** (dev-db) | App uses `journal` page key throughout; AC5 strategy and dev-db checklist in [TR08-slice-completion.md](../delivery/TR08-slice-completion.md). |
 
+### Layout (prototype parity targets)
+
+- [ ] List: `Tabs` filter All / Published / Drafts with counts; **New post** in header; post cards with status badge, linked title, author + publish meta, body preview, image placeholders, row actions (Edit, Publish for drafts, Delete).
+- [ ] New post: full page with `BackLink`, section card for title + content + image list; footer **Cancel**, **Save as draft**, **Publish** (not single Save).
+- [ ] Edit post: status badge + Delete in header; same fields; publish label **Update post** when already published.
+- [ ] List quick **Publish** on draft cards without opening editor (prototype).
+
 ---
 
 ## API / Contract
@@ -102,9 +111,38 @@ Event **journal** at `/journal`: **posts** with optional **images**, backed by *
 
 ## Visual specification
 
-- Chronological feed or grouped list; image thumbnails; upload progress indicator.
-- Editor UX per pace-core2 (toolbar, attachments).
-- Desktop/mobile: post composer and image actions remain usable without relying on desktop-only hover or multi-column layouts.
+### Journal list (`/journal`)
+
+- `PageHeader`: breadcrumb; title **Journal**; subtitle draft vs publish semantics; **New post** primary action.
+- **Status filter tabs:** All, Published, Drafts — each with count badge.
+- **Post feed** (`journal-list`): each post in `Card`:
+  - Status `Badge` (published vs draft).
+  - Title as link button → item route.
+  - Meta line: author, published date or “not yet published”.
+  - Body text preview.
+  - Image strip: placeholder tiles with optional captions.
+  - Actions: **Edit**, **Publish** (draft only), delete icon.
+- Empty: book glyph, **No posts yet**, CTA copy.
+
+### New post (full-page — `#/events/:code/journal/new`)
+
+- `BackLink` → journal list.
+- `PageHeader`: **New journal post**.
+- Section card **Post**: title input, content textarea, **Images** subsection with add/remove rows (caption per image).
+- `JournalSaveBar` footer: Cancel | **Save as draft** (secondary) | **Publish** (primary).
+
+### Edit post (full-page — `#/events/:code/journal/:postId`)
+
+- Header: published/draft badge + **Delete** secondary.
+- Same field card as new post.
+- Footer: Cancel | **Save as draft** | **Publish** or **Update post** when already published.
+- Not-found: 404 pattern with back to journal.
+
+### Implementation delta (pass 2)
+
+- Prototype image rows use caption placeholders; production uses real storage upload with progress ([TR08-slice-completion.md](../delivery/TR08-slice-completion.md)).
+- Prototype routes under `#/events/:code/journal/*`; production flat `/journal` + nested routes.
+- List inline Publish is optional parity; editor publish path is required.
 
 ---
 

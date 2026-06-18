@@ -27,6 +27,8 @@ Reinforces `trac-architecture.md` — do not drift without updating architecture
 
 Establish the TRAC client on **pace-core2**: Vite + React entry, authentication, organisation and event context, protected routing, primary navigation shell (structure only — nav labels/links completed as routes land), and deterministic handling of unknown routes. This slice delivers the **platform spine** so domain slices mount under a single authenticated layout without re-solving auth or provider topology.
 
+- Prototype reference: routing, auth gate, authenticated shell, event landing, and nav switching in `pace-prototype/apps/pace-trac/app.jsx`; event picker layout in `pace-prototype/apps/pace-trac/pages/OverviewPage.jsx` (`TracLandingPage`).
+
 ---
 
 ## Rebuild target
@@ -64,7 +66,7 @@ Establish the TRAC client on **pace-core2**: Vite + React entry, authentication,
 |------|-------------|--------|
 | Auth facade | `@solvera/pace-core` | `UnifiedAuthProvider`, `useUnifiedAuthContext` |
 | Org / event context | `@solvera/pace-core/providers` | `OrganisationServiceProvider`, `EventServiceProvider`, `InactivityServiceProvider` |
-| Protected routing / shell UI | `@solvera/pace-core/components` | `ProtectedRoute`, login/shell/loading components as applicable |
+| Protected routing / shell UI | `@solvera/pace-core/components` | `ProtectedRoute`, `PaceLoginPage`, `PaceAppLayout`, `LoadingSpinner`, login/shell/loading components as applicable |
 | RBAC guards / setup | `@solvera/pace-core/rbac` | `setupRBAC`, `PagePermissionGuard`, `NavigationGuard`, `AccessDenied`, `useSecureSupabase` |
 | Theming / tokens | `@solvera/pace-core/theming` | App theme attachment if required by shell |
 
@@ -95,6 +97,17 @@ This slice does not own `trac_*` domain tables but **must** load RBAC/page metad
 8. Shell renders without requiring domain slices to patch provider internals.
 9. Authenticated NotFound remains reachable without requiring **`read:page.dashboard`**.
 
+### Layout (prototype parity targets)
+
+- [ ] Public `/login` renders without authenticated header, footer, or primary nav (prototype: `PaceLoginPage` only).
+- [ ] Authenticated routes render vertical stack: header → main outlet → footer inside the shell (prototype: `PaceHeader` → `page-body` → `PaceFooter`).
+- [ ] Authenticated home at `/` shows the event landing pattern: `PageHeader`, `EventTile` grid with show-more toggle, optional cross-event `AttentionQueue` (prototype `TracLandingPage`).
+- [ ] Primary nav shows **Events** only when no event is in context; when an event is active, nav lists **Overview**, **Planning**, **Itinerary**, **Risks** (prototype `navItemsForRoute`).
+- [ ] Header includes AppSwitcher for TRAC, org context selector, event context, user menu with **All events** back to home (prototype `PaceHeader`).
+- [ ] Unknown authenticated paths show NotFound with 404 glyph, explanatory copy, and primary **Back to events** action to `/` (prototype `notFound`).
+- [ ] Invalid event code in URL shows event-not-found surface with same structure and CTA (prototype `eventNotFound`).
+- [ ] Event-scoped routes without a selected event use one shared route-level fallback only (not per-page prompts).
+
 ---
 
 ## API / Contract
@@ -108,15 +121,109 @@ This slice does not own `trac_*` domain tables but **must** load RBAC/page metad
 
 No Edge Function requirement for this slice unless login flow depends on platform-wide functions (document if so when implementing).
 
+### Route map (prototype → production)
+
+Prototype uses hash routing (`#/…`); production uses `BrowserRouter` paths with event context from the header selector (not `/events/:code` in the URL).
+
+| Prototype hash path | Production path | Shell / notes |
+|---|---|---|
+| `#/login` | `/login` | Public — no authenticated chrome |
+| `#/` | `/` | Prototype: event picker (`TracLandingPage`); production pass-2 may use header event selector + dashboard when event selected |
+| `#/events/:code` | `/`, `/dashboard` | Event overview content is SLICE-02 (`EventOverviewPage` in prototype) |
+| `#/events/:code/planning` | `/planning` | Event-scoped |
+| `#/events/:code/planning/new/:type` | *(pass 2 — planning slice)* | Full-page new item |
+| `#/events/:code/planning/:itemId` | *(pass 2 — planning slice)* | Full-page item editor |
+| `#/events/:code/itinerary` | `/itinerary` | Schedule mode |
+| `#/events/:code/itinerary/full` | `/masterplan` or itinerary full mode | See TR10 |
+| `#/events/:code/costs` | `/costs` | Event-scoped |
+| `#/events/:code/costs/currency` | `/currency-rates` | RBAC `currency-rates` page key |
+| `#/events/:code/risks` | `/risks` | Event-scoped |
+| `#/events/:code/contacts` | `/contacts` | Event-scoped |
+| `#/events/:code/journal` | `/journal` | Event-scoped |
+| `#/user-dashboard` | `/user-dashboard` → `/` | Redirect only |
+| unmatched | `*` | `NotFoundPage` inside authenticated shell |
+
+Cross-links: event overview launcher grid → [TR02-dashboard-requirements.md](./TR02-dashboard-requirements.md); primary nav IA v1 → [trac-architecture.md](./trac-architecture.md#information-architecture-v1).
+
 ---
 
 ## Visual specification
 
-- **Layout:** pace-core2 app shell — header/region for org/event selectors, primary nav strip, main content outlet, consistent spacing and typography per `@solvera/pace-core` / `theming`.
-- **Login:** Dedicated screen using platform login components; clear error and loading states.
-- **NotFound:** Friendly message, link to dashboard/home; avoid raw router errors.
-- **Access denied:** Use `AccessDenied` (or successor) from RBAC module where guards fail.
-- **No-event handling:** Shared route-level fallback only; feature pages must not render their own competing no-event prompts once mounted behind `ProtectedRoute requireEvent`.
+### Shell variants
+
+**Public auth** (`/login`):
+
+- Full-viewport login only; no `PaceAppLayout` / `PaceHeader` / `PaceFooter`.
+- Use pace-core `PaceLoginPage` with clear loading and error states.
+
+**Authenticated main shell** (all routes under protected layout):
+
+Vertical region stack (prototype → pace-core targets):
+
+1. **Header** — `PaceAppLayout` / prototype `PaceHeader`:
+   - AppSwitcher (`app="trac"`).
+   - Organisation context selector (prototype shows org list; selecting org returns to home).
+   - Event context selector when event-scoped routes are active (production: `showEvents` on `PaceAppLayout`).
+   - Primary nav strip (items depend on landing vs event context — see Navigation).
+   - User menu: **All events** → home; optional **Event settings** stub in prototype.
+2. **Main** — `PaceMain` / prototype `page-body`: lazy `<Outlet />` for slice pages.
+3. **Footer** — `PaceFooter` at shell bottom.
+
+**Global overlays:**
+
+- `ToastProvider` at app root (prototype and production).
+- `ErrorBoundary` wrapping route tree.
+- Session restoration loader during auth restore.
+- Inactivity warning modal before forced logout (pace-core contract).
+- Change-password dialog from user menu (production shell).
+
+### Event landing (`TracLandingPage` at prototype `#/`)
+
+Shell-owned pre-event home (not TR02 dashboard cards):
+
+- `PageHeader`: breadcrumb `pace-trac` → **Events**; title **Choose an event**; subtitle stating how many events the user plans logistics for.
+- **Empty:** `EmptyState` with calendar icon — events from the operator app appear here.
+- **Populated:** `EventTile` grid in `event-tile-grid` section; default **4** tiles, **Show all (N)** / **Show fewer** toggle when more than four events.
+- Each tile: event logo/glyph, date chip, title, date range, venue meta, footer counts (days, participants); click navigates to event overview.
+- **AttentionQueue** below grid: cross-event open risks with warn tone; each item deep-links to that event’s risks register.
+
+### Navigation behaviour
+
+| Context | Prototype primary nav |
+|---------|----------------------|
+| No event in route (`#/`) | Single item **Events** → `/` |
+| Event active (`#/events/:code/…`) | **Overview**, **Planning**, **Itinerary**, **Risks** |
+
+Contacts, Journal, Costs, and Master plan are **not** primary nav items in the prototype; they are reached from the event overview launcher grid ([TR02](./TR02-dashboard-requirements.md)).
+
+Nav items must respect RBAC permission wiring (`enforcePermissions` / `routePermissions` on `PaceAppLayout`).
+
+### Error and fallback surfaces
+
+**NotFound** (unknown path inside shell):
+
+- Centered `not-found` region: large **404** glyph, **Page not found** heading, muted explanatory line, primary button **Back to events** → `/`.
+
+**Event not found** (event code in URL does not match an operated event):
+
+- Same layout as NotFound; heading **Event not found**; copy that the code is not one of the user’s events; primary **Back to events** → `/`.
+
+**No event selected** (event-scoped route without context):
+
+- Single shared fallback (`TracNoEventFallback` pattern in production): card with alert explaining event selection required and link to home — not duplicated on feature pages.
+
+**Access denied:**
+
+- `AccessDenied` from pace-core RBAC when route or page permission fails after shell loads.
+
+### Implementation delta (pass 2)
+
+- Prototype routes embed event code in URL (`#/events/:code/*`); production uses flat paths with header event selector.
+- Prototype full-page event picker at `/` vs production header selector + `TracNoEventFallback` + event dashboard at `/` when event selected.
+- Prototype primary nav is **four items** with **Overview** label; architecture v1 primary nav is **eight items** (Planning through Risks) with dashboard reached via `/` only — align nav in pass 2 per product choice or update architecture first.
+- Prototype org selector in header; production may hide organisations (`showOrganisations: false`) and rely on event selector only.
+- Prototype `PaceHeader`; production uses `PaceAppLayout` (already wired in `authenticated-routes.tsx`).
+- Prototype Tweaks panel is prototype-only; not a rebuild requirement.
 
 ---
 
@@ -126,6 +233,7 @@ No Edge Function requirement for this slice unless login flow depends on platfor
 - Confirm `/user-dashboard` redirect target matches IA.
 - Confirm event-scoped routes use one consistent no-event fallback.
 - Confirm NotFound for garbage path.
+- Confirm event landing tile grid and attention queue when auditing against prototype.
 - **Dev-db:** RBAC page rows exist for TRAC for pages referenced by guards in this slice (e.g. dashboard read if guard wraps home).
 
 ---

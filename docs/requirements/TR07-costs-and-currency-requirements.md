@@ -25,6 +25,8 @@
 
 Deliver **`/costs`** and **`/currency-rates`**: event **cost totals** from the three logistics domains only, **currency conversion** via **`trac_currency_rates`**, **separate RBAC-controlled rates management**, and **per-participant** (or assignment-aware) rollups aligned to schema. **Event base currency** drives display — **no hard-coded AUD** (architecture). Share rollup logic with **Dashboard** and **Master Plan** via a single module or service to avoid drift.
 
+- Prototype reference: rollup and rates in `pace-prototype/apps/pace-trac/pages/CostsPage.jsx` (`CostsPage`, `CurrencyRatesPage` at `#/events/:code/costs/currency`).
+
 ---
 
 ## Current legacy baseline (observational only)
@@ -87,6 +89,14 @@ Legacy showed totals and rates modals; used planning cost fields and currency ra
 4. Per-participant figure matches **R2** (`individual_cost + group_cost/assigned_count` per assigned resource row), and row event totals match **`group_cost + (individual_cost * assigned_count)`**, including documented **NULL/zero** handling.
 5. Exported/shared rollup function used by SLICE-02 and SLICE-10 (no copy-paste divergence).
 
+### Layout (prototype parity targets)
+
+- [ ] Costs: `PageHeader` with **Currency rates** secondary nav to rates sub-route.
+- [ ] Three KPI cells: total event cost, per participant, foreign-currency line count (hero row).
+- [ ] **By resource type** breakdown card with progress bars and percentages.
+- [ ] Line detail `DataTable` with group/individual costs, assigned count, per-person and event total columns; footer info note explaining R2 formula.
+- [ ] Currency rates: `BackLink` to costs; info alert for base currency; rates table with edit/delete; inline add/edit form swaps table.
+
 ---
 
 ## API / Contract
@@ -99,10 +109,30 @@ Legacy showed totals and rates modals; used planning cost fields and currency ra
 
 ## Visual specification
 
-- `/costs`: summary header with total and per-participant; secondary table or chart (pace-core2).
-- `/currency-rates`: focused rates management form/table with RBAC-gated access.
-- Desktop/mobile: totals remain readable on small screens; detailed tables may stack or collapse but must preserve access to row totals, currencies, and conversion status.
-- **Visual specification** for charts: use platform chart primitives or approved library wrapped in pace-core2 styling.
+### Costs summary (`/costs`)
+
+- `PageHeader`: breadcrumb; title **Costs**; subtitle states base currency and FX conversion; header **Currency rates** navigates to rates route.
+- **Hero row** (`cost-hero`) — three cells:
+  1. **Total event cost** — large formatted amount, base currency label, active row count.
+  2. **Per participant** — amount over approved application count.
+  3. **Foreign-currency lines** — count + currency list or “all in {base}”.
+- **By resource type** card: label + rows per transport/accommodation/activity with glyph, amount, mini progress bar, percentage column.
+- **Line detail** `DataTable`: title **Line detail**; sortable columns — resource name + type subline, currency, group cost, individual cost, assigned count, per person (base), event total (base); aggregate sum row; empty state directs to Planning.
+- **Formula footnote** (`fx-note`): explains event total and per-person allocation rules (R2); notes excluded cancelled rows when present.
+
+### Currency rates (`/currency-rates` — prototype `#/events/:code/costs/currency`)
+
+- `BackLink` → costs summary.
+- `PageHeader`: title **Currency rates**; **Add rate** when list visible.
+- Info alert: base currency and rate direction (foreign units per 1 base).
+- **List mode:** table — currency code, conversion description, numeric rate, edit/delete row actions; empty state when no foreign currencies.
+- **Inline form mode** (`CurrencyForm` in `Card`): code + rate fields, duplicate-code error, `SaveActions` footer — replaces table (not modal).
+
+### Implementation delta (pass 2)
+
+- Prototype nests rates under `#/events/:code/costs/currency`; production uses flat `/currency-rates` per architecture.
+- Prototype displays AUD-formatted hero for demo; production uses **event base currency** from metadata (no hard-coded currency).
+- Charts optional in production; prototype is table-first.
 
 ---
 

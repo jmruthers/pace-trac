@@ -25,6 +25,8 @@
 
 Event **contacts** CRUD at `/contacts`: maintain the contact list used across TRAC (including risk register linkage in SLICE-09). Scope is **organisation/event** per brief; permissions via contacts page key. Ensure consistency with risk **contact links** (foreign keys or join table per dev-db — validate with Supabase MCP).
 
+- Prototype reference: list and inline create/edit in `pace-prototype/apps/pace-trac/pages/ContactsPage.jsx` (`ContactForm` swaps list in place — no modal).
+
 ---
 
 ## Current legacy baseline (observational only)
@@ -85,6 +87,13 @@ Implementation status: see [TR06-slice-completion.md](../delivery/TR06-slice-com
 | 4 | Unauthorised users cannot read or mutate contacts. | **Complete** (shell `read:page.contacts`, `PagePermissionGuard`, mutation `useResourcePermissions`, RLS) |
 | 5 | If inactive/archive semantics exist in schema, active pickers exclude inactive contacts by default and delete-blocking FK failures return actionable guidance. | **Complete (partial AC)** — no `is_active`/archive columns on dev-db (inactive clause N/A); FK `23503` maps to risk-link guidance in `use-contacts` |
 
+### Layout (prototype parity targets)
+
+- [ ] `PageHeader` with breadcrumb; title **Contacts**; **Add contact** primary when list visible.
+- [ ] Inline create/edit: `ContactForm` in `Card` replaces list (not dialog) — first name, surname, role (with hint), phone, email; `SaveActions` footer.
+- [ ] List mode: `SearchInput` filter; `contact-grid` of cards with avatar initials, name, role pill, `ContactRow` phone/email lines, edit + delete icon actions.
+- [ ] Empty search vs empty list copy differentiated; delete confirmation dialog.
+
 ---
 
 ## API / Contract
@@ -98,9 +107,30 @@ Implementation status: see [TR06-slice-completion.md](../delivery/TR06-slice-com
 
 ## Visual specification
 
-- Table or card list with primary/secondary lines (name, role, phone, email per schema).
-- Modal or side panel for edit; destructive confirm for delete.
-- Desktop/mobile: list actions remain usable on smaller screens without horizontal-only affordances.
+### Contacts list (`/contacts`)
+
+- `PageHeader`: breadcrumb Events → event → **Contacts**; subtitle describing external supporting people; header **Add contact** (hidden while form surface active).
+- **Search:** `SearchInput` above grid (placeholder **Search contacts**).
+- **Contact cards** (`contact-grid` / `<ul>`):
+  - Avatar initials circle, name (`h3`), role as muted pill.
+  - Body: phone and email via `ContactRow` components when present.
+  - Footer: icon edit + destructive delete.
+- **Empty:** icon + **No contacts found** — different copy for active search vs no contacts yet.
+
+### Inline create/edit (replaces list — prototype house style)
+
+- `Card` with `CardHeader` title **Add contact** or **Edit contact**.
+- `Form` grid: first name, surname (required); role (full width, hint for organisation context); phone; email.
+- `SaveActions` in footer (Save + cancel) — not a separate modal.
+
+### Destructive flows
+
+- `ConfirmationDialog` on delete with contact name in description.
+
+### Implementation delta (pass 2)
+
+- Production may use `DataTable` CRUD pattern instead of card grid — preserve field set, inline-vs-modal preference, and search behaviour.
+- Prototype route `#/events/:code/contacts`; production flat `/contacts` with header event context.
 
 ---
 

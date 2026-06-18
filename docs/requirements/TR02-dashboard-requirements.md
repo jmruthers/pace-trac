@@ -25,6 +25,8 @@
 
 Deliver the **event dashboard** at `/` and `/dashboard`: summary cards that reflect the **explicit v1 dashboard contract** in `trac-architecture.md` — planning counts, itinerary date range, costs, contacts, and lightweight assignments navigation — while using **pace-core2** UI and **`trac_status`** (not free-text status strings). Dashboard is **not** a primary nav item; users reach it via `/`.
 
+- Prototype reference: event overview hero, KPI row, attention queue, and launcher grid in `pace-prototype/apps/pace-trac/pages/OverviewPage.jsx` (`EventOverviewPage` via `EventOverview` composite).
+
 ---
 
 ## Rebuild target
@@ -87,6 +89,14 @@ Deliver the **event dashboard** at `/` and `/dashboard`: summary cards that refl
 6. Dashboard includes a lightweight `/assignments` link (without introducing new assignment aggregate metrics).
 7. One failed aggregate card does not blank the whole dashboard.
 
+### Layout (prototype parity targets — `EventOverviewPage`)
+
+- [ ] `EventOverview` shell: breadcrumb Events → event name; page title = event name; subtitle on trip logistics scope.
+- [ ] **Hero** region: `HeroLogo`, event title, meta rows (dates, venue, participant count), description, primary **Open planning** + secondary **View itinerary** actions.
+- [ ] **KPI row** (four tiles): planning confirmed/total, itinerary day span, total event cost + per participant, open risks count (warm when > 0).
+- [ ] **AttentionQueue** when actionable items exist (unconfirmed logistics, open risks) with deep links.
+- [ ] **Additional information** section: launcher grid (Contacts, Cost summary, Journal) with icon, title, description, optional count badge.
+
 ---
 
 ## API / Contract
@@ -100,9 +110,68 @@ Deliver the **event dashboard** at `/` and `/dashboard`: summary cards that refl
 
 ## Visual specification
 
-- Responsive grid of cards; clear hierarchy; use pace-core2 card/button patterns.
-- **Loading:** Skeletons or inline loading; **empty:** explicit copy for “no itinerary”, zero contacts, etc.
-- **Event logo:** Consistent with Master Plan / platform file display component.
+### Event overview layout (prototype `EventOverviewPage`)
+
+Prototype maps event overview to `#/events/:code` (nav label **Overview**). Production serves equivalent content at `/` and `/dashboard` per architecture.
+
+**Page chrome (`EventOverview`):**
+
+- Breadcrumb: **Events** → event name (current).
+- Title: event name; subtitle describing transport, itinerary, costs, and risk scope.
+
+**Hero band:**
+
+- Media: event logo (`HeroLogo` with image or glyph fallback).
+- Title repeat + meta list with icons: date range, venue, participant count.
+- Event description paragraph when present.
+- Actions: primary **Open planning** → `/planning`; secondary **View itinerary** → `/itinerary`.
+
+**KPI grid (four `KPI` tiles):**
+
+| Tile | Primary value | Detail line |
+|------|---------------|-------------|
+| Planning confirmed | `{confirmed} / {total}` | logistics rows across three types |
+| Itinerary | day count or em dash | earliest → latest dates or empty copy |
+| Total event cost | formatted total | per participant + base currency |
+| Open risks | `{open} / {total}` | warm styling when open > 0 |
+
+**Attention queue (`AttentionQueue`):**
+
+- Warn-tone items for: logistics rows not yet confirmed (links to planning); open risks (links to risks).
+- Omit section when no items.
+
+**Launcher grid (`launcher-grid`):**
+
+Section heading **Additional information**; navigational cards (button cards, not primary nav):
+
+| Launcher | Icon | Routes to |
+|----------|------|-----------|
+| External contacts | phone | `/contacts` |
+| Cost summary | wallet | `/costs` |
+| Journal | book | `/journal` |
+
+Each card: icon, title, description, optional count (contacts, journal posts).
+
+### Architecture v1 dashboard cards (pass 2 alignment)
+
+Architecture composite contract also specifies discrete cards linking to planning, itinerary, costs, contacts, plus `/assignments` link. Pass 2 may:
+
+- Map KPI + launchers to explicit `Card`/`CardGrid` components per architecture, **or**
+- Retain `EventOverview` composite if it satisfies the same links and metrics.
+
+Either approach must use shared rollup helpers (SLICE-07) and CR25 date range for itinerary card.
+
+### Loading and errors
+
+- Per-card skeleton or inline loading; empty copy for zero contacts, no itinerary dates, etc.
+- Independent card error states per hybrid partial-failure policy.
+
+### Implementation delta (pass 2)
+
+- Prototype route `#/events/:code` with **Overview** in primary nav; production dashboard at `/` without Overview nav label ([TR01](./TR01-platform-shell-requirements.md)).
+- Prototype `EventOverview` composite bundles hero + KPIs + launchers; production `DashboardContent` may use separate cards — preserve metrics and links from architecture.
+- Prototype uses mock `fmtAUD`; production uses event base currency.
+- Master plan launcher in prototype is under itinerary full mode / overview copy — not a separate dashboard launcher (see [TR10](./TR10-master-plan-requirements.md)).
 
 ---
 

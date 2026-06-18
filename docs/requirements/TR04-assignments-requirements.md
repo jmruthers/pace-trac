@@ -27,6 +27,8 @@
 
 Deliver **`/assignments`**: planner-facing CRUD for **`trac_itinerary_assignment`**, linking **`base_application`** (participant) to logistics rows via **`resource_type`** + **`resource_id`**, with **headcounts** vs **capacity** on transport/accommodation/activity, optional **notes**, and views that help planners see coverage per resource. This route **owns all assignment mutations**; `/planning` remains logistics-only.
 
+- Prototype reference: inline **`AssignPanel`** on `PlanningItemPage` in `pace-prototype/apps/pace-trac/pages/PlanningPage.jsx` (prototype has **no** `/assignments` route).
+
 ---
 
 ## Current legacy baseline (observational only)
@@ -91,6 +93,15 @@ Legacy TRAC had **no dedicated assignments route** and did not surface assignmen
 5. User without **planning** (or future **assignments**) read/write cannot manage assignments.
 6. No assignment mutations implemented under `/planning`.
 
+### Layout (prototype parity targets — `AssignPanel` on planning item page)
+
+- [ ] Section card **Assigned people** beside resource details on item page layout (prototype `item-assign`).
+- [ ] Headline readout: assigned count vs capacity (or **uncapped**); capacity bar with over/near/full styling; over-capacity note when assigned > capacity.
+- [ ] Named assignment list with participant cells and per-row notes; remove action per row.
+- [ ] **Add participant** flow: toggle reveals search + pick list of approved members not yet assigned; selecting adds row and warns when over capacity.
+- [ ] Further unnamed headcount note when assigned count exceeds named rows (prototype `further` count).
+- [ ] Production `/assignments` route: by-resource table view per rebuild target — not required to duplicate two-column item layout.
+
 ---
 
 ## API / Contract
@@ -104,9 +115,38 @@ Legacy TRAC had **no dedicated assignments route** and did not surface assignmen
 
 ## Visual specification
 
-- Dense operational UI: tables with filters by resource type; mobile-friendly stacked layout.
-- Clear badges for capacity pressure (token-based colours).
-- Empty states: “No assignments yet” with CTA to add; loading states for pickers.
+### Prototype layout authority (`AssignPanel` on `PlanningItemPage`)
+
+Embedded in planning item **two-column** `item-layout` (details card + assignment card):
+
+**Header row (`section-card-head`):**
+
+- Title **Assigned people**; subtitle explaining named allocations vs headcount cost basis.
+- Capacity readout (`asg-cap-readout`): large **assigned / capacity** (or assigned only when uncapped); horizontal bar with over/near/full states; mono notes (**N over capacity**, **at capacity**).
+
+**Body:**
+
+- List of named assignments: `ParticipantCell` + optional notes field + remove control.
+- **Add participant** toggle expands search (`SearchInput`) and scrollable pick list of available approved members.
+- Footer note when headcount exceeds named rows (“N further unnamed seats” pattern).
+
+**Interactions:**
+
+- Add participant: toast on success; warn tone when assignment exceeds capacity (prototype — maps to architecture Option B confirmation in production).
+- Remove assignment: immediate with toast.
+
+### Production `/assignments` route (pass 2)
+
+- Dense operational UI: filter/table **by resource type** (architecture primary v1 view).
+- Capacity pressure badges using design tokens (`CapacityMeter` or equivalent).
+- Empty: **No assignments yet** with CTA; loading on pickers.
+- Deep link from planning item optional (“Open assignments”) without embedding mutations on `/planning`.
+
+### Implementation delta (pass 2)
+
+- **Route split:** prototype folds all assignment UX into planning item page; production dedicates `/assignments` per architecture — requirement layout above describes **prototype panel**; pass-2 implements equivalent capabilities on `/assignments`.
+- Prototype does not implement separate by-resource management table; production v1 prioritises by-resource lists per architecture.
+- Over-capacity: prototype warns via toast; production requires explicit confirmation dialog before save (Option B).
 
 ---
 
