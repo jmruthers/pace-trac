@@ -92,10 +92,11 @@ This slice does not own `trac_*` domain tables but **must** load RBAC/page metad
 3. Unauthenticated access to protected routes redirects to login (or platform-standard behaviour).
 4. Unknown paths under the authenticated app show **NotFound** (`*`) with accessible navigation back.
 5. Org and event context are available to child routes via pace-core2 providers (or documented successor API).
-6. Event-scoped routes use pace-core2 **`ProtectedRoute requireEvent`** (or documented successor API) with one approved TRAC no-event fallback.
-7. RBAC secure client is configured once; domain slices use the same pattern (no parallel raw clients for privileged operations).
-8. Shell renders without requiring domain slices to patch provider internals.
-9. Authenticated NotFound remains reachable without requiring **`read:page.dashboard`**.
+6. Hard refresh on an event-scoped route restores the last selected event via pace-core `EventService` `localStorage` persistence (`pace_selected_event_id`).
+7. Event-scoped routes use pace-core2 **`ProtectedRoute requireEvent`** (or documented successor API) with one approved TRAC no-event fallback.
+8. RBAC secure client is configured once; domain slices use the same pattern (no parallel raw clients for privileged operations).
+9. Shell renders without requiring domain slices to patch provider internals.
+10. Authenticated NotFound remains reachable without requiring **`read:page.dashboard`**.
 
 ### Layout (prototype parity targets)
 
