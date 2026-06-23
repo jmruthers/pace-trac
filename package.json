@@ -27,7 +27,7 @@
     "test:coverage:fast": "vitest run -c vitest.unit.config.ts --coverage --coverage.provider=v8"
   },
   "dependencies": {
-    "@solvera/pace-core": "^0.1.2",
+    "@solvera/pace-core": "0.1.2",
     "@supabase/supabase-js": "^2.0.0",
     "@tanstack/react-query": "^5.0.0",
     "react": "^19.2.6",
