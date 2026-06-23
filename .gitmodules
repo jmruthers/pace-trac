@@ -1,0 +1,3 @@
+[submodule "pace-core2"]
+	path = pace-core2
+	url = https://github.com/jmruthers/pace-core2.git
