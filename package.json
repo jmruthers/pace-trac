@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port 8088",
+    "install:deps": "bash scripts/install-deps.sh",
+    "install:deps:update": "bash scripts/with-env.sh npm install",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
